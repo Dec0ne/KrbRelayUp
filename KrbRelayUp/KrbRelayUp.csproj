@@ -166,7 +166,6 @@
     <Compile Include="Kerb\ndr\Win32\Rpc\RpcUtils.cs" />
     <Compile Include="Kerb\Networking.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Relay\Com\COMInterfaces.cs" />
     <Compile Include="Relay\Com\COMObjRef.cs" />
     <Compile Include="Relay\Com\COMUtilities.cs" />
