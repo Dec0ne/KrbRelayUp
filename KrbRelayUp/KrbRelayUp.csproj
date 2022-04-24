@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{ED83E265-D48E-4B0D-8C22-D9D0A67C78F2}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>KrbRelayUp</RootNamespace>
+    <AssemblyName>KrbRelayUp</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Interop.NetFwTypeLib">
+      <HintPath>.\Interop.NetFwTypeLib.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.DirectoryServices.Protocols" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AskTGT.cs" />
+    <Compile Include="Asn1\Asn1Extensions.cs" />
+    <Compile Include="Asn1\AsnElt.cs" />
+    <Compile Include="Asn1\AsnException.cs" />
+    <Compile Include="Asn1\AsnIO.cs" />
+    <Compile Include="Asn1\AsnOID.cs" />
+    <Compile Include="KrbSCM.cs" />
+    <Compile Include="Kerb\Crypto.cs" />
+    <Compile Include="Kerb\crypto\dh\DiffieHellmanKey.cs" />
+    <Compile Include="Kerb\crypto\dh\IExchangeKey.cs" />
+    <Compile Include="Kerb\crypto\dh\IKeyAgreement.cs" />
+    <Compile Include="Kerb\crypto\dh\KeyAgreementAlgorithm.cs" />
+    <Compile Include="Kerb\crypto\dh\ManagedDiffieHellman.cs" />
+    <Compile Include="Kerb\crypto\dh\ManagedDiffieHellmanOakley14.cs" />
+    <Compile Include="Kerb\crypto\dh\ManagedDiffieHellmanOakley2.cs" />
+    <Compile Include="Kerb\crypto\dh\Oakley.cs" />
+    <Compile Include="Kerb\crypto\SafeNativeMethods.cs" />
+    <Compile Include="Kerb\Helpers.cs" />
+    <Compile Include="Kerb\Interop.cs" />
+    <Compile Include="Kerb\Interop\Luid.cs" />
+    <Compile Include="Kerb\Interop\NtException.cs" />
+    <Compile Include="Kerb\KDCKeyAgreement.cs" />
+    <Compile Include="Kerb\krb_structures\ADIfRelevant.cs" />
+    <Compile Include="Kerb\krb_structures\ADKerbLocal.cs" />
+    <Compile Include="Kerb\krb_structures\ADRestrictionEntry.cs" />
+    <Compile Include="Kerb\krb_structures\ADWin2KPac.cs" />
+    <Compile Include="Kerb\krb_structures\AP_REQ.cs" />
+    <Compile Include="Kerb\krb_structures\AS_REP.cs" />
+    <Compile Include="Kerb\krb_structures\AS_REQ.cs" />
+    <Compile Include="Kerb\krb_structures\Authenticator.cs" />
+    <Compile Include="Kerb\krb_structures\AuthorizationData.cs" />
+    <Compile Include="Kerb\krb_structures\Checksum.cs" />
+    <Compile Include="Kerb\krb_structures\EncKDCRepPart.cs" />
+    <Compile Include="Kerb\krb_structures\EncKrbCredPart.cs" />
+    <Compile Include="Kerb\krb_structures\EncKrbPrivPart.cs" />
+    <Compile Include="Kerb\krb_structures\EncryptedData.cs" />
+    <Compile Include="Kerb\krb_structures\EncryptionKey.cs" />
+    <Compile Include="Kerb\krb_structures\EncTicketPart.cs" />
+    <Compile Include="Kerb\krb_structures\ETYPE_INFO2_ENTRY.cs" />
+    <Compile Include="Kerb\krb_structures\HostAddress.cs" />
+    <Compile Include="Kerb\krb_structures\KDC_PROXY_MESSAGE.cs" />
+    <Compile Include="Kerb\krb_structures\KDC_REQ_BODY.cs" />
+    <Compile Include="Kerb\krb_structures\KERB_PA_PAC_REQUEST.cs" />
+    <Compile Include="Kerb\krb_structures\KrbAlgorithmIdentifier.cs" />
+    <Compile Include="Kerb\krb_structures\KrbAuthPack.cs" />
+    <Compile Include="Kerb\krb_structures\KrbCredInfo.cs" />
+    <Compile Include="Kerb\krb_structures\KrbDHRepInfo.cs" />
+    <Compile Include="Kerb\krb_structures\KrbKDCDHKeyInfo.cs" />
+    <Compile Include="Kerb\krb_structures\KrbPkAuthenticator.cs" />
+    <Compile Include="Kerb\krb_structures\KrbSubjectPublicKeyInfo.cs" />
+    <Compile Include="Kerb\krb_structures\KRB_CRED.cs" />
+    <Compile Include="Kerb\krb_structures\KRB_ERROR.cs" />
+    <Compile Include="Kerb\krb_structures\KRB_PRIV.cs" />
+    <Compile Include="Kerb\krb_structures\LastReq.cs" />
+    <Compile Include="Kerb\krb_structures\pac\Attributes.cs" />
+    <Compile Include="Kerb\krb_structures\pac\ClientName.cs" />
+    <Compile Include="Kerb\krb_structures\pac\LogonInfo.cs" />
+    <Compile Include="Kerb\krb_structures\pac\Ndr\Kerberos_PAC.cs" />
+    <Compile Include="Kerb\krb_structures\pac\PacCredentialInfo.cs" />
+    <Compile Include="Kerb\krb_structures\pac\PacInfoBuffer.cs" />
+    <Compile Include="Kerb\krb_structures\pac\PACTYPE.cs" />
+    <Compile Include="Kerb\krb_structures\pac\Requestor.cs" />
+    <Compile Include="Kerb\krb_structures\pac\S4UDelegationInfo.cs" />
+    <Compile Include="Kerb\krb_structures\pac\SignatureData.cs" />
+    <Compile Include="Kerb\krb_structures\pac\UpnDns.cs" />
+    <Compile Include="Kerb\krb_structures\PA_DATA.cs" />
+    <Compile Include="Kerb\krb_structures\PA_ENC_TS_ENC.cs" />
+    <Compile Include="Kerb\krb_structures\PA_FOR_USER.cs" />
+    <Compile Include="Kerb\krb_structures\PA_PAC_OPTIONS.cs" />
+    <Compile Include="Kerb\krb_structures\PA_PK_AS_REP.cs" />
+    <Compile Include="Kerb\krb_structures\PA_PK_AS_REQ.cs" />
+    <Compile Include="Kerb\krb_structures\PA_S4U_X509_USER.cs" />
+    <Compile Include="Kerb\krb_structures\PrincipalName.cs" />
+    <Compile Include="Kerb\krb_structures\S4UUserID.cs" />
+    <Compile Include="Kerb\krb_structures\TGS_REP.cs" />
+    <Compile Include="Kerb\krb_structures\TGS_REQ.cs" />
+    <Compile Include="Kerb\krb_structures\Ticket.cs" />
+    <Compile Include="Kerb\krb_structures\TransitedEncoding.cs" />
+    <Compile Include="Kerb\LSA.cs" />
+    <Compile Include="Kerb\math\BigInteger.cs" />
+    <Compile Include="Kerb\math\ConfidenceFactor.cs" />
+    <Compile Include="Kerb\math\NextPrimeFinder.cs" />
+    <Compile Include="Kerb\math\PrimalityTest.cs" />
+    <Compile Include="Kerb\math\PrimeGeneratorBase.cs" />
+    <Compile Include="Kerb\math\SequentialSearchPrimeGeneratorBase.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\INdrConformantStructure.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\INdrNonEncapsulatedUnion.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\INdrStructure.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrContextHandle.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrDataRepresentation.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrDeferralStack.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrEmbeddedPointer.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrEmpty.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrEnum16.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrInt3264.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrInterfacePointer.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrMarshalBuffer.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrPickledType.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrPipe.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrUnmarshalBuffer.cs" />
+    <Compile Include="Kerb\ndr\Ndr\Marshal\NdrUnsupported.cs" />
+    <Compile Include="Kerb\ndr\Ndr\NdrNativeUtils.cs" />
+    <Compile Include="Kerb\ndr\Ndr\NdrParser.cs" />
+    <Compile Include="Kerb\ndr\Utilities\Memory\CrossBitnessTypeAttribute.cs" />
+    <Compile Include="Kerb\ndr\Utilities\Memory\IMemoryReader.cs" />
+    <Compile Include="Kerb\ndr\Utilities\Memory\SafeBufferWrapper.cs" />
+    <Compile Include="Kerb\ndr\Utilities\Text\BinaryEncoding.cs" />
+    <Compile Include="Kerb\ndr\Utilities\Text\HexDumpBuilder.cs" />
+    <Compile Include="Kerb\ndr\Win32\Rpc\RpcUtils.cs" />
+    <Compile Include="Kerb\Networking.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Relay\Com\COMInterfaces.cs" />
+    <Compile Include="Relay\Com\COMObjRef.cs" />
+    <Compile Include="Relay\Com\COMUtilities.cs" />
+    <Compile Include="Relay\Com\ComUtils.cs" />
+    <Compile Include="Relay\Attacks\Generic.cs" />
+    <Compile Include="Relay\IStorage\IEnumSTATSTG.cs" />
+    <Compile Include="Relay\IStorage\ILockBytes.cs" />
+    <Compile Include="Relay\IStorage\IMarshal.cs" />
+    <Compile Include="Relay\IStorage\IStorage.cs" />
+    <Compile Include="Relay\IStorage\IStream.cs" />
+    <Compile Include="Relay\IStorage\Ole32.cs" />
+    <Compile Include="Relay\IStorage\StandardActivator.cs" />
+    <Compile Include="Relay\IStorage\StorageTrigger.cs" />
+    <Compile Include="Relay\Ldap.cs" />
+    <Compile Include="Relay\Misc\Helpers.cs" />
+    <Compile Include="Relay\Misc\Interop.cs" />
+    <Compile Include="Relay\Misc\Natives.cs" />
+    <Compile Include="Relay\Misc\SecurityBuffer.cs" />
+    <Compile Include="Relay\Attacks\RBCD.cs" />
+    <Compile Include="Relay\Relay.cs" />
+    <Compile Include="S4U.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
