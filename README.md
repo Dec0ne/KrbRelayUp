@@ -8,7 +8,7 @@ Simple wrapper around some of the features of [Rubeus](https://github.com/GhostP
 3. Add RBCD privs and obtain privileged ST to local machine ([Rubeus](https://github.com/GhostPack/Rubeus/))
 4. Using said ST to authenticate to local Service Manager and create a new service as NT/SYSTEM. ([SCMUACBypass](https://gist.github.com/tyranid/c24cfd1bd141d14d4925043ee7e03c82))
 
-**This is essentially a universal no-fix privilege escalation in windows domain environments where LDAP signing is not enforced (the default settings).**
+**This is essentially a universal no-fix local privilege escalation in windows domain environments where LDAP signing is not enforced (the default settings).**
 
 ### Usage
 ```
