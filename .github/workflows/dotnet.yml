@@ -20,6 +20,11 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore
+      run: dotnet build --no-restore --release
     - name: Test
       run: dotnet test --no-build --verbosity normal
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: KrbRelayUp.exe
+        path: D:\a\KrbRelayUp\KrbRelayUp\KrbRelayUp\bin\Release\KrbRelayUp.exe
