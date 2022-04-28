@@ -58,7 +58,7 @@ namespace KrbRelayUp.lib.Interop
         public override string ToString()
         {
             UInt64 Value = ((UInt64)HighPart << 32) + LowPart;
-            return String.Format("0x{0:x}", Value);
+            return $"0x{Value:x}";
         }
 
         public static bool operator ==(LUID x, LUID y)

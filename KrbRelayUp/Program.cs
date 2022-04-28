@@ -181,7 +181,7 @@ namespace KrbRelayUp
 
                 if (!String.IsNullOrEmpty(computerPassword))
                 {
-                    string salt = String.Format("{0}host{1}.{2}", domain.ToUpper(), computerName.ToLower(), domain.ToLower());
+                    string salt = $"{domain.ToUpper()}host{computerName.ToLower()}.{domain.ToLower()}";
                     hash = Crypto.KerberosPasswordHash(Interop.KERB_ETYPE.aes256_cts_hmac_sha1, computerPassword, salt);
                     eType = Interop.KERB_ETYPE.aes256_cts_hmac_sha1;
                 }

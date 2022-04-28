@@ -318,11 +318,11 @@ namespace KrbRelayUp
                                         int flags = BitConverter.ToInt32((byte[])(Array)credData.Credentials, 4);
                                         if (flags == 3)
                                         {
-                                            hash = String.Format("{0}:{1}", Helpers.ByteArrayToString(((byte[])(Array)credData.Credentials).Skip(8).Take(16).ToArray()), Helpers.ByteArrayToString(((byte[])(Array)credData.Credentials).Skip(24).Take(16).ToArray()));
+                                            hash = $"{Helpers.ByteArrayToString(((byte[]) (Array) credData.Credentials).Skip(8).Take(16).ToArray())}:{Helpers.ByteArrayToString(((byte[]) (Array) credData.Credentials).Skip(24).Take(16).ToArray())}";
                                         }
                                         else
                                         {
-                                            hash = String.Format("{0}", Helpers.ByteArrayToString(((byte[])(Array)credData.Credentials).Skip(24).Take(16).ToArray()));
+                                            hash = $"{Helpers.ByteArrayToString(((byte[]) (Array) credData.Credentials).Skip(24).Take(16).ToArray())}";
                                         }
                                     }
                                     else

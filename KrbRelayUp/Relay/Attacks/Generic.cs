@@ -152,7 +152,7 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
                 ld,
                 $"{Relay.domainDN}",
                 (int)LdapSearchScope.LDAP_SCOPE_SUBTREE,
-                String.Format("(&(objectClass=computer)(sAMAccountName={0}))", computername),
+                $"(&(objectClass=computer)(sAMAccountName={computername}))",
                 pLaps,
                 0);
             //Console.WriteLine("[*] msgID: {0}", search);
@@ -205,7 +205,7 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
                 ld,
                 $"{Relay.domainDN}",
                 (int)LdapSearchScope.LDAP_SCOPE_SUBTREE,
-                String.Format("(&(objectClass=*)(sAMAccountName={0}))", adObject),
+                $"(&(objectClass=*)(sAMAccountName={adObject}))",
                 pLaps,
                 0);
             //Console.WriteLine("[*] msgID: {0}", search);

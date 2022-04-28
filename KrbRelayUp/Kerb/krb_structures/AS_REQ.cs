@@ -243,7 +243,7 @@ namespace KrbRelayUp
                         req_body = new KDCReqBody(s.Sub[0]);
                         break;
                     default:
-                        throw new Exception(String.Format("Invalid tag AS-REQ value : {0}", s.TagValue));
+                        throw new Exception($"Invalid tag AS-REQ value : {s.TagValue}");
                 }
             }
         }

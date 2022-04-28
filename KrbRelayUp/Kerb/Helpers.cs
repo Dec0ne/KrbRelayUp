@@ -307,7 +307,7 @@ namespace KrbRelayUp
                 {
                     if (File.Exists(filePath))
                     {
-                        throw new Exception(String.Format("{0} already exists! Data not written to file.\r\n", filePath));
+                        throw new Exception($"{filePath} already exists! Data not written to file.\r\n");
                     }
                 }
                 File.WriteAllBytes(filePath, data);

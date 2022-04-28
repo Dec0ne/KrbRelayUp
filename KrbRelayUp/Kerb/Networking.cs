@@ -87,7 +87,7 @@ namespace KrbRelayUp
                             {
                                 Console.WriteLine("[*] Using domain controller: {0} ({1})", DCName, dcIP);
                             }
-                            return String.Format("{0}", dcIP);
+                            return $"{dcIP}";
                         }
                     }
                     Console.WriteLine("[X] Error resolving hostname '{0}' to an IP address: no IPv4 or IPv6 address found", DCName);
@@ -204,7 +204,7 @@ namespace KrbRelayUp
             }
             else if (!String.IsNullOrEmpty(domain))
             {
-                ldapOu = String.Format("DC={0}", domain.Replace(".", ",DC="));
+                ldapOu = $"DC={domain.Replace(".", ",DC=")}";
             }
 
             //If no DC, domain, credentials, or OU were specified
@@ -218,17 +218,17 @@ namespace KrbRelayUp
                 string bindPath = "";
                 if (!String.IsNullOrEmpty(ldapPrefix))
                 {
-                    bindPath = String.Format("LDAP://{0}", ldapPrefix);
+                    bindPath = $"LDAP://{ldapPrefix}";
                 }
                 if (!String.IsNullOrEmpty(ldapOu))
                 {
                     if (!String.IsNullOrEmpty(bindPath))
                     {
-                        bindPath = String.Format("{0}/{1}", bindPath, ldapOu);
+                        bindPath = $"{bindPath}/{ldapOu}";
                     }
                     else
                     {
-                        bindPath = String.Format("LDAP://{0}", ldapOu);
+                        bindPath = $"LDAP://{ldapOu}";
                     }
                 }
 
@@ -238,7 +238,7 @@ namespace KrbRelayUp
             if (cred != null)
             {
                 // if we're using alternate credentials for the connection
-                string userDomain = String.Format("{0}\\{1}", cred.Domain, cred.UserName);
+                string userDomain = $"{cred.Domain}\\{cred.UserName}";
                 directoryObject.Username = userDomain;
                 directoryObject.Password = cred.Password;
 
@@ -320,7 +320,7 @@ namespace KrbRelayUp
 
                 if (String.IsNullOrEmpty(OUName))
                 {
-                    OUName = String.Format("DC={0}", domain.Replace(".", ",DC="));
+                    OUName = $"DC={domain.Replace(".", ",DC=")}";
                 }
 
                 try
@@ -447,7 +447,7 @@ namespace KrbRelayUp
         public static Dictionary<string, Dictionary<string, Object>> GetGptTmplContent(string path, string user = null, string password = null)
         {
             Dictionary<string, Dictionary<string, Object>> IniObject = new Dictionary<string, Dictionary<string, Object>>();
-            string sysvolPath = String.Format("\\\\{0}\\SYSVOL", (new Uri(path).Host));
+            string sysvolPath = $"\\\\{(new Uri(path).Host)}\\SYSVOL";
 
             int result = AddRemoteConnection(null, sysvolPath, user, password);
             if (result != (int)Interop.SystemErrorCodes.ERROR_SUCCESS)
@@ -504,7 +504,7 @@ namespace KrbRelayUp
             if (host != null)
             {
                 string targetComputerName = host.Trim('\\');
-                paths.Add(String.Format("\\\\{0}\\IPC$", targetComputerName));
+                paths.Add($"\\\\{targetComputerName}\\IPC$");
             }
             else
             {
@@ -545,7 +545,7 @@ namespace KrbRelayUp
             if (host != null)
             {
                 string targetComputerName = host.Trim('\\');
-                paths.Add(String.Format("\\\\{0}\\IPC$", targetComputerName));
+                paths.Add($"\\\\{targetComputerName}\\IPC$");
             }
             else
             {
