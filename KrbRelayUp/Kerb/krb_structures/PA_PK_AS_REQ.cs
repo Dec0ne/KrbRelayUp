@@ -39,8 +39,8 @@ namespace KrbRelayUp
             }
             signed.ComputeSignature(signer, silent: false);
 
-            return AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] {
-                AsnElt.Make(AsnElt.CONTEXT, 0, new AsnElt[]{
+            return AsnElt.Make(AsnElt.SEQUENCE, new[] {
+                AsnElt.Make(AsnElt.CONTEXT, 0, new[]{
                     AsnElt.MakeBlob(signed.Encode())
                     //AsnElt.Decode(signed.Encode())
                 })

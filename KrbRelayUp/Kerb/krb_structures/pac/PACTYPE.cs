@@ -83,7 +83,7 @@ namespace KrbRelayUp.Kerberos
 
                 byte[] pacBuffer = pacInfoBuffer.Encode();
                 bw.Write((int)pacInfoBuffer.Type);
-                bw.Write((int)pacBuffer.Length);
+                bw.Write(pacBuffer.Length);
                 bw.Write(offset);
 
                 long oldPosition = bw.BaseStream.Position;

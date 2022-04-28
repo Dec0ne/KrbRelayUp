@@ -260,7 +260,7 @@ namespace KrbRelayUp
                 }
             }
 
-            if (ptt || ((ulong)luid != 0))
+            if (ptt || (luid != 0))
             {
                 // pass-the-ticket -> import into LSASS
                 LSA.ImportTicket(kirbiBytes, luid);

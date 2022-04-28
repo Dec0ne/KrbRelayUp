@@ -701,7 +701,7 @@ namespace KrbRelayUp.Ndr.Marshal
 
         public T ReadStruct<T>() where T : INdrStructure, new()
         {
-            INdrStructure s = (INdrStructure)new T();
+            INdrStructure s = new T();
             bool conformant = false;
             if (s is INdrConformantStructure conformant_struct)
             {

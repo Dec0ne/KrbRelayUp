@@ -39,14 +39,14 @@ namespace KrbRelayUp.lib.Interop
             }
             else
             {
-                System.ArgumentException argEx = new System.ArgumentException("Passed LUID string value is not in a hex or decimal form", value);
+                ArgumentException argEx = new ArgumentException("Passed LUID string value is not in a hex or decimal form", value);
                 throw argEx;
             }
         }
 
         public override int GetHashCode()
         {
-            UInt64 Value = ((UInt64)this.HighPart << 32) + this.LowPart;
+            UInt64 Value = ((UInt64)HighPart << 32) + LowPart;
             return Value.GetHashCode();
         }
 
@@ -57,18 +57,18 @@ namespace KrbRelayUp.lib.Interop
 
         public override string ToString()
         {
-            UInt64 Value = ((UInt64)this.HighPart << 32) + this.LowPart;
-            return String.Format("0x{0:x}", (ulong)Value);
+            UInt64 Value = ((UInt64)HighPart << 32) + LowPart;
+            return String.Format("0x{0:x}", Value);
         }
 
         public static bool operator ==(LUID x, LUID y)
         {
-            return (((ulong)x) == ((ulong)y));
+            return (x == ((ulong)y));
         }
 
         public static bool operator !=(LUID x, LUID y)
         {
-            return (((ulong)x) != ((ulong)y));
+            return (x != ((ulong)y));
         }
 
         public static implicit operator ulong(LUID luid)

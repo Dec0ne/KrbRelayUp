@@ -174,30 +174,30 @@ namespace Mono.Math
         public BigInteger()
         {
             data = new uint[DEFAULT_LEN];
-            this.length = DEFAULT_LEN;
+            length = DEFAULT_LEN;
         }
 
         public BigInteger(Sign sign, uint len)
         {
-            this.data = new uint[len];
-            this.length = len;
+            data = new uint[len];
+            length = len;
         }
 
         public BigInteger(BigInteger bi)
         {
-            this.data = (uint[])bi.data.Clone();
-            this.length = bi.length;
+            data = (uint[])bi.data.Clone();
+            length = bi.length;
         }
 
         public BigInteger(BigInteger bi, uint len)
         {
 
-            this.data = new uint[len];
+            data = new uint[len];
 
             for (uint i = 0; i < bi.length; i++)
-                this.data[i] = bi.data[i];
+                data[i] = bi.data[i];
 
-            this.length = bi.length;
+            length = bi.length;
         }
 
         #endregion
@@ -228,12 +228,12 @@ namespace Mono.Math
 
             switch (leftOver)
             {
-                case 1: data[length - 1] = (uint)inData[0]; break;
+                case 1: data[length - 1] = inData[0]; break;
                 case 2: data[length - 1] = (uint)((inData[0] << 8) | inData[1]); break;
                 case 3: data[length - 1] = (uint)((inData[0] << 16) | (inData[1] << 8) | inData[2]); break;
             }
 
-            this.Normalize();
+            Normalize();
         }
 
         public BigInteger(uint[] inData)
@@ -247,12 +247,12 @@ namespace Mono.Math
             for (int i = (int)length - 1, j = 0; i >= 0; i--, j++)
                 data[j] = inData[i];
 
-            this.Normalize();
+            Normalize();
         }
 
         public BigInteger(uint ui)
         {
-            data = new uint[] { ui };
+            data = new[] { ui };
         }
 
         public BigInteger(ulong ul)
@@ -260,7 +260,7 @@ namespace Mono.Math
             data = new uint[2] { (uint)ul, (uint)(ul >> 32) };
             length = 2;
 
-            this.Normalize();
+            Normalize();
         }
 
         public static implicit operator BigInteger(uint value)
@@ -380,7 +380,7 @@ namespace Mono.Math
 
         public static uint operator %(BigInteger bi, uint ui)
         {
-            return Kernel.DwordMod(bi, (uint)ui);
+            return Kernel.DwordMod(bi, ui);
         }
 
         public static BigInteger operator %(BigInteger bi1, BigInteger bi2)
@@ -521,14 +521,14 @@ namespace Mono.Math
             byte[] random = new byte[dwords << 2];
 
             rng.GetBytes(random);
-            Buffer.BlockCopy(random, 0, ret.data, 0, (int)dwords << 2);
+            Buffer.BlockCopy(random, 0, ret.data, 0, dwords << 2);
 
             if (remBits != 0)
             {
                 uint mask = (uint)(0x01 << (remBits - 1));
                 ret.data[dwords - 1] |= mask;
 
-                mask = (uint)(0xFFFFFFFF >> (32 - remBits));
+                mask = 0xFFFFFFFF >> (32 - remBits);
                 ret.data[dwords - 1] &= mask;
             }
             else
@@ -557,7 +557,7 @@ namespace Mono.Math
             if (this == 0)
                 return;
 
-            int bits = this.BitCount();
+            int bits = BitCount();
             int dwords = bits >> 5;
             int remBits = bits & 0x1F;
 
@@ -567,14 +567,14 @@ namespace Mono.Math
             byte[] random = new byte[dwords << 2];
 
             rng.GetBytes(random);
-            Buffer.BlockCopy(random, 0, data, 0, (int)dwords << 2);
+            Buffer.BlockCopy(random, 0, data, 0, dwords << 2);
 
             if (remBits != 0)
             {
                 uint mask = (uint)(0x01 << (remBits - 1));
                 data[dwords - 1] |= mask;
 
-                mask = (uint)(0xFFFFFFFF >> (32 - remBits));
+                mask = 0xFFFFFFFF >> (32 - remBits);
                 data[dwords - 1] &= mask;
             }
             else
@@ -597,7 +597,7 @@ namespace Mono.Math
 
         public int BitCount()
         {
-            this.Normalize();
+            Normalize();
 
             uint value = data[length - 1];
             uint mask = 0x80000000;
@@ -624,7 +624,7 @@ namespace Mono.Math
             byte bitPos = (byte)(bitNum & 0x1F);    // get the lowest 5 bits
 
             uint mask = (uint)1 << bitPos;
-            return ((this.data[bytePos] & mask) != 0);
+            return ((data[bytePos] & mask) != 0);
         }
 
         public bool TestBit(int bitNum)
@@ -635,7 +635,7 @@ namespace Mono.Math
             byte bitPos = (byte)(bitNum & 0x1F);    // get the lowest 5 bits
 
             uint mask = (uint)1 << bitPos;
-            return ((this.data[bytePos] | mask) == this.data[bytePos]);
+            return ((data[bytePos] | mask) == data[bytePos]);
         }
 
         public void SetBit(uint bitNum)
@@ -652,13 +652,13 @@ namespace Mono.Math
         {
             uint bytePos = bitNum >> 5;             // divide by 32
 
-            if (bytePos < this.length)
+            if (bytePos < length)
             {
                 uint mask = (uint)1 << (int)(bitNum & 0x1F);
                 if (value)
-                    this.data[bytePos] |= mask;
+                    data[bytePos] |= mask;
                 else
-                    this.data[bytePos] &= ~mask;
+                    data[bytePos] &= ~mask;
             }
         }
 
@@ -825,8 +825,8 @@ namespace Mono.Math
         {
             uint val = 0;
 
-            for (uint i = 0; i < this.length; i++)
-                val ^= this.data[i];
+            for (uint i = 0; i < length; i++)
+                val ^= data[i];
 
             return (int)val;
         }
@@ -895,7 +895,7 @@ namespace Mono.Math
                     return false;
             }
             // the last step is to confirm the "large" prime with the SPP or Miller-Rabin test
-            return PrimalityTests.Test(this, Prime.ConfidenceFactor.Medium);
+            return PrimalityTests.Test(this, ConfidenceFactor.Medium);
         }
 
         #endregion
@@ -959,7 +959,7 @@ namespace Mono.Math
 
             public ModulusRing(BigInteger modulus)
             {
-                this.mod = modulus;
+                mod = modulus;
 
                 // calculate constant = b^ (2k) / m
                 uint i = mod.length << 1;
@@ -1586,7 +1586,7 @@ namespace Mono.Math
                 // Add common parts of both numbers
                 do
                 {
-                    sum = ((ulong)x[i]) + ((ulong)y[i]) + sum;
+                    sum = x[i] + ((ulong)y[i]) + sum;
                     r[i] = (uint)sum;
                     sum >>= 32;
                 } while (++i < yMax);
@@ -1727,7 +1727,7 @@ namespace Mono.Math
                 // Add common parts of both numbers
                 do
                 {
-                    sum += ((ulong)x[i]) + ((ulong)y[i]);
+                    sum += x[i] + ((ulong)y[i]);
                     r[i] = (uint)sum;
                     sum >>= 32;
                 } while (++i < yMax);
@@ -1889,7 +1889,7 @@ namespace Mono.Math
 
                 BigInteger rem = (uint)r;
 
-                return new BigInteger[] { ret, rem };
+                return new[] { ret, rem };
             }
 
             #endregion
@@ -1898,7 +1898,7 @@ namespace Mono.Math
 
             public static BigInteger[] multiByteDivide(BigInteger bi1, BigInteger bi2)
             {
-                if (Kernel.Compare(bi1, bi2) == Sign.Negative)
+                if (Compare(bi1, bi2) == Sign.Negative)
                     return new BigInteger[2] { 0, new BigInteger(bi1) };
 
                 bi1.Normalize(); bi2.Normalize();
@@ -1934,10 +1934,10 @@ namespace Mono.Math
 
                 while (j > 0)
                 {
-                    ulong dividend = ((ulong)remainder[pos] << 32) + (ulong)remainder[pos - 1];
+                    ulong dividend = ((ulong)remainder[pos] << 32) + remainder[pos - 1];
 
-                    ulong q_hat = dividend / (ulong)firstDivisorByte;
-                    ulong r_hat = dividend % (ulong)firstDivisorByte;
+                    ulong q_hat = dividend / firstDivisorByte;
+                    ulong r_hat = dividend % firstDivisorByte;
 
                     do
                     {
@@ -1946,7 +1946,7 @@ namespace Mono.Math
                             (q_hat * secondDivisorByte) > ((r_hat << 32) + remainder[pos - 2]))
                         {
                             q_hat--;
-                            r_hat += (ulong)firstDivisorByte;
+                            r_hat += firstDivisorByte;
 
                             if (r_hat < 0x100000000)
                                 continue;
@@ -1968,7 +1968,7 @@ namespace Mono.Math
                     uint uint_q_hat = (uint)q_hat;
                     do
                     {
-                        mc += (ulong)bi2.data[dPos] * (ulong)uint_q_hat;
+                        mc += bi2.data[dPos] * (ulong)uint_q_hat;
                         t = remainder[nPos];
                         remainder[nPos] -= (uint)mc;
                         mc >>= 32;
@@ -1987,7 +1987,7 @@ namespace Mono.Math
 
                         do
                         {
-                            sum = ((ulong)remainder[nPos]) + ((ulong)bi2.data[dPos]) + sum;
+                            sum = remainder[nPos] + ((ulong)bi2.data[dPos]) + sum;
                             remainder[nPos] = (uint)sum;
                             sum >>= 32;
                             dPos++; nPos++;
@@ -1995,7 +1995,7 @@ namespace Mono.Math
 
                     }
 
-                    quot.data[resultPos--] = (uint)uint_q_hat;
+                    quot.data[resultPos--] = uint_q_hat;
 
                     pos--;
                     j--;
@@ -2096,7 +2096,7 @@ namespace Mono.Math
 
                 do
                 {
-                    c += (ulong)n.data[i] * (ulong)f;
+                    c += n.data[i] * (ulong)f;
                     ret.data[i] = (uint)c;
                     c >>= 32;
                 } while (++i < n.length);
@@ -2136,7 +2136,7 @@ namespace Mono.Math
                         uint* dP = dB;
                         for (uint* yP = yB; yP < yE; yP++, dP++)
                         {
-                            mcarry += ((ulong)*xP * (ulong)*yP) + (ulong)*dP;
+                            mcarry += (*xP * (ulong)*yP) + *dP;
 
                             *dP = (uint)mcarry;
                             mcarry >>= 32;
@@ -2178,7 +2178,7 @@ namespace Mono.Math
                         uint* dP = dB;
                         for (uint* yP = yB; yP < yE && dP < dE; yP++, dP++)
                         {
-                            mcarry += ((ulong)*xP * (ulong)*yP) + (ulong)*dP;
+                            mcarry += (*xP * (ulong)*yP) + *dP;
 
                             *dP = (uint)mcarry;
                             mcarry >>= 32;
@@ -2221,7 +2221,7 @@ namespace Mono.Math
                         for (uint j = i + 1; j < dl; j++, tP2++, dP2++)
                         {
                             // k = i + j
-                            mcarry += ((ulong)bi1val * (ulong)*dP2) + *tP2;
+                            mcarry += (bi1val * (ulong)*dP2) + *tP2;
 
                             *tP2 = (uint)mcarry;
                             mcarry >>= 32;
@@ -2251,7 +2251,7 @@ namespace Mono.Math
                     tP = tt;
                     for (uint* dE = dP + dl; (dP < dE); dP++, tP++)
                     {
-                        ulong val = (ulong)*dP * (ulong)*dP + *tP;
+                        ulong val = *dP * (ulong)*dP + *tP;
                         *tP = (uint)val;
                         val >>= 32;
                         *(++tP) += (uint)val;

@@ -21,7 +21,7 @@ namespace KrbRelayUp
             AsnElt parameters = AsnElt.Decode(Parameters);
 
             return AsnElt.Make(
-                AsnElt.SEQUENCE, new AsnElt[] {
+                AsnElt.SEQUENCE, new[] {
                     AsnElt.MakeOID(Algorithm.Value),
                     parameters}
                 );

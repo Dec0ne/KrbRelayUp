@@ -57,7 +57,7 @@ namespace KrbRelayUp
             if ((hex.Length % 16) != 0)
             {
                 Console.WriteLine("\r\n[X] Hash must be 16, 32 or 64 characters in length\r\n");
-                System.Environment.Exit(1);
+                Environment.Exit(1);
             }
 
             // yes I know this inefficient

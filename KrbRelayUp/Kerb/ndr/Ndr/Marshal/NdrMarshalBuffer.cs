@@ -145,7 +145,7 @@ namespace KrbRelayUp.Ndr.Marshal
         #endregion
 
         #region Constructors
-        public NdrMarshalBuffer() : this(new NdrDataRepresentation()
+        public NdrMarshalBuffer() : this(new NdrDataRepresentation
         {
             CharacterRepresentation = NdrCharacterRepresentation.ASCII,
             FloatingPointRepresentation = NdrFloatingPointRepresentation.IEEE,

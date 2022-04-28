@@ -942,7 +942,7 @@ namespace Asn1
                         throw new AsnException(
                             "integer overflow (negative)");
                     }
-                    x = (x << 8) + (long)ValueByte(k);
+                    x = (x << 8) + ValueByte(k);
                 }
             }
             else
@@ -955,7 +955,7 @@ namespace Asn1
                         throw new AsnException(
                             "integer overflow (positive)");
                     }
-                    x = (x << 8) + (long)ValueByte(k);
+                    x = (x << 8) + ValueByte(k);
                 }
             }
             return x;
@@ -1052,7 +1052,7 @@ namespace Asn1
                 int orig = off;
                 foreach (AsnElt ae in Sub)
                 {
-                    ae.CheckTag(AsnElt.OCTET_STRING);
+                    ae.CheckTag(OCTET_STRING);
                     off += ae.GetOctetString(dst, off);
                 }
                 return off - orig;
@@ -1162,7 +1162,7 @@ namespace Asn1
                     throw new AsnException(
                         "invalid OID: integer overflow");
                 }
-                acc = (acc << 7) + (long)(v & 0x7F);
+                acc = (acc << 7) + (v & 0x7F);
                 if ((v & 0x80) == 0)
                 {
                     sb.Append('.');
@@ -2259,7 +2259,7 @@ namespace Asn1
                 {
                     if (x[i] != y[i])
                     {
-                        return (int)x[i] - (int)y[i];
+                        return x[i] - y[i];
                     }
                 }
                 return xLen - yLen;
@@ -2303,12 +2303,12 @@ namespace Asn1
             return a;
         }
 
-        public static AsnElt NULL_V = AsnElt.MakePrimitive(
+        public static AsnElt NULL_V = MakePrimitive(
             NULL, new byte[0]);
 
-        public static AsnElt BOOL_TRUE = AsnElt.MakePrimitive(
+        public static AsnElt BOOL_TRUE = MakePrimitive(
             BOOLEAN, new byte[] { 0xFF });
-        public static AsnElt BOOL_FALSE = AsnElt.MakePrimitive(
+        public static AsnElt BOOL_FALSE = MakePrimitive(
             BOOLEAN, new byte[] { 0x00 });
 
         /*
@@ -2348,7 +2348,7 @@ namespace Asn1
                 {
                     throw new AsnException("OID element overflow");
                 }
-                x = x * (long)10 + (long)(c - '0');
+                x = x * 10 + (c - '0');
             }
             if (x < 0)
             {

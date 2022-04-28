@@ -212,7 +212,7 @@ namespace KrbRelayUp.Relay
         internal static extern void ldap_value_free_len(IntPtr vals);
 
         [DllImport("Wtsapi32.dll")]
-        public static extern bool WTSQuerySessionInformation(IntPtr hServer, int sessionId, WTS_INFO_CLASS wtsInfoClass, out System.IntPtr ppBuffer, out uint pBytesReturned);
+        public static extern bool WTSQuerySessionInformation(IntPtr hServer, int sessionId, WTS_INFO_CLASS wtsInfoClass, out IntPtr ppBuffer, out uint pBytesReturned);
 
         [DllImport("advapi32.dll", EntryPoint = "SystemFunction018", SetLastError = true, CallingConvention = CallingConvention.StdCall)]
         private static extern NTStatus RtlEncryptNtOwfPwdWithNtSesKey([In] byte[] ntOwfPassword, [In] ref byte[] sessionkey, [In, Out] byte[] encryptedNtOwfPassword);
@@ -396,7 +396,7 @@ namespace KrbRelayUp.Relay
 
             public int Size
             {
-                get { return (int)Marshal.SizeOf(typeof(PROCESS_BASIC_INFORMATION)); }
+                get { return Marshal.SizeOf(typeof(PROCESS_BASIC_INFORMATION)); }
             }
         }
 

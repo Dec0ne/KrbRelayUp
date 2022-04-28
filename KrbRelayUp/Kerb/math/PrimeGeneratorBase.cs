@@ -53,11 +53,11 @@ namespace Mono.Math.Prime.Generator
             }
         }
 
-        public virtual Prime.PrimalityTest PrimalityTest
+        public virtual PrimalityTest PrimalityTest
         {
             get
             {
-                return new Prime.PrimalityTest(PrimalityTests.RabinMillerTest);
+                return new PrimalityTest(PrimalityTests.RabinMillerTest);
             }
         }
 
@@ -74,7 +74,7 @@ namespace Mono.Math.Prime.Generator
         /// <remarks>The speed of this method is dependent on Confidence</remarks>
         protected bool PostTrialDivisionTests(BigInteger bi)
         {
-            return PrimalityTest(bi, this.Confidence);
+            return PrimalityTest(bi, Confidence);
         }
 
         public abstract BigInteger GenerateNewPrime(int bits);

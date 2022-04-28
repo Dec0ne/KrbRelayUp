@@ -92,7 +92,7 @@ namespace KrbRelayUp
             int AuthenticationPackage;
             int ntstatus, ProtocalStatus;
 
-            if ((ulong)targetLuid != 0)
+            if (targetLuid != 0)
             {
                 if (!Helpers.IsHighIntegrity())
                 {
@@ -146,7 +146,7 @@ namespace KrbRelayUp
                 request.KerbCredSize = ticket.Length;
                 request.KerbCredOffset = Marshal.SizeOf(typeof(Interop.KERB_SUBMIT_TKT_REQUEST));
 
-                if ((ulong)targetLuid != 0)
+                if (targetLuid != 0)
                 {
                     Console.WriteLine("[*] Target LUID: 0x{0:x}", (ulong)targetLuid);
                     request.LogonId = targetLuid;
@@ -193,7 +193,7 @@ namespace KrbRelayUp
             int AuthenticationPackage;
             int ntstatus, ProtocalStatus;
 
-            if ((ulong)targetLuid != 0)
+            if (targetLuid != 0)
             {
                 if (!Helpers.IsHighIntegrity())
                 {
@@ -225,7 +225,7 @@ namespace KrbRelayUp
                 var request = new Interop.KERB_PURGE_TKT_CACHE_REQUEST();
                 request.MessageType = Interop.KERB_PROTOCOL_MESSAGE_TYPE.KerbPurgeTicketCacheMessage;
 
-                if ((ulong)targetLuid != 0)
+                if (targetLuid != 0)
                 {
                     Console.WriteLine("[*] Target LUID: 0x{0:x}", (ulong)targetLuid);
                     request.LogonId = targetLuid;

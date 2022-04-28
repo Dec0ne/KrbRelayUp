@@ -11,7 +11,7 @@ namespace KrbRelayUp.Kerberos.PAC
 
         public Attributes(PacInfoBufferType type)
         {
-            this.Type = type;
+            Type = type;
         }
 
         public Attributes()

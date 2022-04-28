@@ -23,7 +23,7 @@ namespace KrbRelayUp
         {
 
             return AsnElt.Make(AsnElt.SEQUENCE,
-                new AsnElt[] {
+                new[] {
                     AsnElt.Make(AsnElt.CONTEXT,0, Authenticator.Encode()),
                     AsnElt.Make(AsnElt.CONTEXT,1, ClientPublicValue.Encode() ),
                     //AsnElt.Make(AsnElt.CONTEXT,2, new AsnElt[]{ CMSTypes } ),

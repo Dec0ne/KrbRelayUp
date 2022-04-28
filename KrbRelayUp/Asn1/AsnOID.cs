@@ -244,7 +244,7 @@ namespace Asn1
             StringBuilder sb = new StringBuilder();
             foreach (char c in name)
             {
-                int d = (int)c;
+                int d = c;
                 if (d <= 32 || d == '-')
                 {
                     continue;
@@ -253,7 +253,7 @@ namespace Asn1
                 {
                     d += 'a' - 'A';
                 }
-                sb.Append((char)c);
+                sb.Append(c);
             }
             return sb.ToString();
         }

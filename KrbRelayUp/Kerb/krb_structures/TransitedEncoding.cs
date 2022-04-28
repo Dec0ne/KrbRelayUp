@@ -37,7 +37,7 @@ namespace KrbRelayUp
         {
             // tr-type            [0] Int32
             AsnElt trTypeElt = AsnElt.MakeInteger((long)tr_type);
-            AsnElt trTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { trTypeElt });
+            AsnElt trTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { trTypeElt });
             trTypeSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, trTypeSeq);
 
             AsnElt seq;
@@ -46,7 +46,7 @@ namespace KrbRelayUp
             if (contents != null)
             {
                 AsnElt contentsElt = AsnElt.MakeBlob(contents);
-                AsnElt contentsSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { contentsElt });
+                AsnElt contentsSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { contentsElt });
                 contentsSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 1, contentsSeq);
                 seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { trTypeSeq, contentsSeq });
             }

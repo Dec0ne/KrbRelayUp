@@ -32,11 +32,11 @@ namespace KrbRelayUp
 
             AsnElt asnCTime = AsnElt.MakeString(AsnElt.GeneralizedTime, CTime.ToString("yyyyMMddHHmmssZ"));
 
-            return AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] {
-                    AsnElt.Make(AsnElt.CONTEXT,0, new AsnElt[] { AsnElt.MakeInteger(CuSec) }),
-                    AsnElt.Make(AsnElt.CONTEXT,1, new AsnElt[]{ asnCTime } ),
-                    AsnElt.Make(AsnElt.CONTEXT,2, new AsnElt[]{ AsnElt.MakeInteger(Nonce) } ),
-                    AsnElt.Make(AsnElt.CONTEXT,3, new AsnElt[]{ AsnElt.MakeBlob(paChecksum) })
+            return AsnElt.Make(AsnElt.SEQUENCE, new[] {
+                    AsnElt.Make(AsnElt.CONTEXT,0, new[] { AsnElt.MakeInteger(CuSec) }),
+                    AsnElt.Make(AsnElt.CONTEXT,1, new[]{ asnCTime } ),
+                    AsnElt.Make(AsnElt.CONTEXT,2, new[]{ AsnElt.MakeInteger(Nonce) } ),
+                    AsnElt.Make(AsnElt.CONTEXT,3, new[]{ AsnElt.MakeBlob(paChecksum) })
                 });
         }
     }

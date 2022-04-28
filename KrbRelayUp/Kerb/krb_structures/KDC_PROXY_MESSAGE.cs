@@ -61,7 +61,7 @@ namespace KrbRelayUp
 
             // kerb-message [0] OCTET STRING
             AsnElt messageAsn = AsnElt.MakeBlob(kerb_message);
-            AsnElt messageSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { messageAsn });
+            AsnElt messageSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { messageAsn });
             messageSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, messageSeq);
             allNodes.Add(messageSeq);
 
