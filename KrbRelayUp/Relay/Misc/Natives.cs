@@ -394,10 +394,7 @@ namespace KrbRelayUp.Relay
             public UIntPtr UniqueProcessId;
             public int InheritedFromUniqueProcessId;
 
-            public int Size
-            {
-                get { return Marshal.SizeOf(typeof(PROCESS_BASIC_INFORMATION)); }
-            }
+            public int Size => Marshal.SizeOf(typeof(PROCESS_BASIC_INFORMATION));
         }
 
         [StructLayout(LayoutKind.Sequential)]

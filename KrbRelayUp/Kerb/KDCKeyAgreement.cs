@@ -3,14 +3,12 @@ using System.Security.Cryptography;
 
 namespace KrbRelayUp
 {
-
     public class KDCKeyAgreement
     {
-
-        public byte[] P { get { return Oakley.Group14.Prime; } }
-        public byte[] G { get { return Oakley.Group14.Generator; } }
-        public byte[] Q { get { return Oakley.Group14.Factor; } }
-        public byte[] Y { get { return diffieHellman.PublicKey.PublicComponent; } }
+        public byte[] P => Oakley.Group14.Prime;
+        public byte[] G => Oakley.Group14.Generator;
+        public byte[] Q => Oakley.Group14.Factor;
+        public byte[] Y => diffieHellman.PublicKey.PublicComponent;
 
         ManagedDiffieHellmanOakley14 diffieHellman = new ManagedDiffieHellmanOakley14();
 

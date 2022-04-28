@@ -467,13 +467,7 @@ namespace KrbRelayUp.Relay.Com
 
         public int ProcessId => COMUtilities.GetProcessIdFromIPid(Ipid);
 
-        public string ProcessName
-        {
-            get
-            {
-                return COMUtilities.GetProcessNameById(ProcessId);
-            }
-        }
+        public string ProcessName => COMUtilities.GetProcessNameById(ProcessId);
 
         public int ApartmentId => COMUtilities.GetApartmentIdFromIPid(Ipid);
         public string ApartmentName => COMUtilities.GetApartmentIdStringFromIPid(Ipid);

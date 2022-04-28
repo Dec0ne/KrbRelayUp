@@ -53,18 +53,9 @@ namespace Mono.Math.Prime.Generator
             }
         }
 
-        public virtual PrimalityTest PrimalityTest
-        {
-            get
-            {
-                return new PrimalityTest(PrimalityTests.RabinMillerTest);
-            }
-        }
+        public virtual PrimalityTest PrimalityTest => new PrimalityTest(PrimalityTests.RabinMillerTest);
 
-        public virtual int TrialDivisionBounds
-        {
-            get { return 4000; }
-        }
+        public virtual int TrialDivisionBounds => 4000;
 
         /// <summary>
         /// Performs primality tests on bi, assumes trial division has been done.

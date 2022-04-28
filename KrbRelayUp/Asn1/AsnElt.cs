@@ -107,14 +107,8 @@ namespace Asn1
         int tagClass_;
         public int TagClass
         {
-            get
-            {
-                return tagClass_;
-            }
-            private set
-            {
-                tagClass_ = value;
-            }
+            get => tagClass_;
+            private set => tagClass_ = value;
         }
 
         /*
@@ -123,14 +117,8 @@ namespace Asn1
         int tagValue_;
         public int TagValue
         {
-            get
-            {
-                return tagValue_;
-            }
-            private set
-            {
-                tagValue_ = value;
-            }
+            get => tagValue_;
+            private set => tagValue_ = value;
         }
 
         /*
@@ -140,27 +128,15 @@ namespace Asn1
         AsnElt[] sub_;
         public AsnElt[] Sub
         {
-            get
-            {
-                return sub_;
-            }
-            private set
-            {
-                sub_ = value;
-            }
+            get => sub_;
+            private set => sub_ = value;
         }
 
         /*
          * The "constructed" flag: true for an elements with sub-elements,
          * false for a primitive element.
          */
-        public bool Constructed
-        {
-            get
-            {
-                return Sub != null;
-            }
-        }
+        public bool Constructed => Sub != null;
 
         /*
          * The value length. When the object is BER-encoded with an
@@ -311,13 +287,7 @@ namespace Asn1
         /*
          * Get a string representation of the tag class and value.
          */
-        public string TagString
-        {
-            get
-            {
-                return TagToString(TagClass, TagValue);
-            }
-        }
+        public string TagString => TagToString(TagClass, TagValue);
 
         static string TagToString(int tc, int tv)
         {
