@@ -1,4 +1,5 @@
-﻿using Asn1;
+﻿using System;
+using Asn1;
 
 namespace KrbRelayUp
 {
@@ -11,7 +12,7 @@ namespace KrbRelayUp
         public TransitedEncoding()
         {
             tr_type = Interop.TransitedEncodingType.NULL;
-            contents = new byte[0];
+            contents = Array.Empty<byte>();
         }
 
         public TransitedEncoding(AsnElt body)

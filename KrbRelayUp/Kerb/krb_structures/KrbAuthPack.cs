@@ -1,4 +1,5 @@
-﻿using Asn1;
+﻿using System;
+using Asn1;
 using System.Security.Cryptography.X509Certificates;
 
 namespace KrbRelayUp
@@ -16,7 +17,7 @@ namespace KrbRelayUp
         {
             Authenticator = authenticator;
             Certificate = certificate;
-            ClientDHNonce = new byte[0];
+            ClientDHNonce = Array.Empty<byte>();
         }
 
         public AsnElt Encode()

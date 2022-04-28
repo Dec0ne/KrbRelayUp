@@ -133,7 +133,7 @@ namespace KrbRelayUp
             {
                 // generate the decryption key using Diffie Hellman shared secret 
                 PA_PK_AS_REP pkAsRep = (PA_PK_AS_REP)rep.padata[0].value;
-                key = pkAsReq.Agreement.GenerateKey(pkAsRep.DHRepInfo.KDCDHKeyInfo.SubjectPublicKey.DepadLeft(), new byte[0],
+                key = pkAsReq.Agreement.GenerateKey(pkAsRep.DHRepInfo.KDCDHKeyInfo.SubjectPublicKey.DepadLeft(), Array.Empty<byte>(),
                     pkAsRep.DHRepInfo.ServerDHNonce, GetKeySize(etype));
             }
             else

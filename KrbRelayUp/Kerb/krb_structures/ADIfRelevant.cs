@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Asn1;
 
 namespace KrbRelayUp
@@ -103,7 +104,7 @@ namespace KrbRelayUp
             }
             else if (ad_data.Length < 1)
             {
-                ad_data = new byte[0];
+                ad_data = Array.Empty<byte>();
             }
 
             return ADEncode();

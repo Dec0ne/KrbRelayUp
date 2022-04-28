@@ -2159,7 +2159,7 @@ namespace Asn1
             a.TagValue = tagValue;
             if (subs == null)
             {
-                a.Sub = new AsnElt[0];
+                a.Sub = Array.Empty<AsnElt>();
             }
             else
             {
@@ -2187,7 +2187,7 @@ namespace Asn1
             a.TagValue = SET;
             if (subs == null)
             {
-                a.Sub = new AsnElt[0];
+                a.Sub = Array.Empty<AsnElt>();
             }
             else
             {
@@ -2269,7 +2269,7 @@ namespace Asn1
         }
 
         public static AsnElt NULL_V = MakePrimitive(
-            NULL, new byte[0]);
+            NULL, Array.Empty<byte>());
 
         public static AsnElt BOOL_TRUE = MakePrimitive(
             BOOLEAN, new byte[] { 0xFF });

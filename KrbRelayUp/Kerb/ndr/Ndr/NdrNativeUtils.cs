@@ -47,7 +47,7 @@ namespace KrbRelayUp.Ndr
 
             if (p == IntPtr.Zero)
             {
-                return new T[0];
+                return Array.Empty<T>();
             }
 
             IntPtr curr = p;
@@ -496,7 +496,7 @@ namespace KrbRelayUp.Ndr
         {
             if (nCount == IntPtr.Zero || pSyntaxInfo == IntPtr.Zero)
             {
-                return new MIDL_SYNTAX_INFO[0];
+                return Array.Empty<MIDL_SYNTAX_INFO>();
             }
             return reader.ReadArray<MIDL_SYNTAX_INFO>(pSyntaxInfo, nCount.ToInt32());
         }
@@ -611,7 +611,7 @@ namespace KrbRelayUp.Ndr
         {
             if (RpcProtseqEndpoint == IntPtr.Zero || RpcProtseqEndpointCount == 0)
             {
-                return new RPC_PROTSEQ_ENDPOINT[0];
+                return Array.Empty<RPC_PROTSEQ_ENDPOINT>();
             }
             return reader.ReadArray<RPC_PROTSEQ_ENDPOINT>(RpcProtseqEndpoint, RpcProtseqEndpointCount);
         }
