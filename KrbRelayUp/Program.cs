@@ -34,7 +34,7 @@ namespace KrbRelayUp
         public static void GetHelp()
         {
             Console.WriteLine("RELAY:");
-            Console.WriteLine("Usage: KrbRelayUp.exe relay -d FQDN -cn CUMPUTERNAME [-c] [-cp PASSWORD | -ch NTHASH]\n");
+            Console.WriteLine("Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD | -ch NTHASH]\n");
             Console.WriteLine("    -d  (--Domain)                   FQDN of domain.");
             Console.WriteLine("    -c  (--CreateNewComputerAccount)    Create new computer account for RBCD. Will use the current authenticated user.");
             Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (deafult=KRBRELAYUP$ [if -c is enabled])");
