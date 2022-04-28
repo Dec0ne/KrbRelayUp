@@ -51,7 +51,6 @@ namespace KrbRelayUp
             Console.WriteLine("    -sc (--ServiceCommand)           Service command [binPath]. (default = spawn cmd.exe as SYSTEM");
 
             Console.WriteLine("");
-            Environment.Exit(0);
         }
 
         static void Main(string[] args)
@@ -61,6 +60,7 @@ namespace KrbRelayUp
             if (args.Length == 0)
             {
                 GetHelp();
+                return;
             }
 
             if (args[0].ToLower() == "system")
@@ -70,7 +70,7 @@ namespace KrbRelayUp
                     KrbSCM.RunSystemProcess(Convert.ToInt32(args[1]));
                 }
                 catch { }
-                Environment.Exit(0);
+                return;
             }
 
             // parse args
@@ -100,6 +100,7 @@ namespace KrbRelayUp
             {
                 Console.WriteLine("Must supply FQDN using [-d FQDN]");
                 GetHelp();
+                return;
             }
 
             domain = args[iDomain + 1];
@@ -161,7 +162,7 @@ namespace KrbRelayUp
                     {
                         Console.WriteLine($"[-] Could not add new computer account:");
                         Console.WriteLine($"[-] {e.Message}");
-                        Environment.Exit(0);
+                        return;
                     }
                 }
 
@@ -205,7 +206,6 @@ namespace KrbRelayUp
                 System.Threading.Thread.Sleep(1500);
 
                 KrbSCM.Run(targetSPN, serviceName, serviceCommand);
-                Environment.Exit(0);
             }
         }
 
