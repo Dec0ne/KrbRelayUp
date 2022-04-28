@@ -1,17 +1,8 @@
-﻿using Asn1;
-using KrbRelayUp.Asn1;
-using KrbRelayUp.Kerberos;
-using KrbRelayUp.Kerberos.PAC;
-using KrbRelayUp.lib.Interop;
 using System;
-using System.Collections.Generic;
-using System.DirectoryServices;
 using System.DirectoryServices.Protocols;
-using System.Linq;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace KrbRelayUp
 {

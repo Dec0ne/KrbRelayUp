@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.DirectoryServices;
 using System.DirectoryServices.Protocols;
-using KrbRelayUp.lib.Interop;
 
 namespace KrbRelayUp
 {
