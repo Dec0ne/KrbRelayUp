@@ -17,7 +17,7 @@ Simple wrapper around some of the features of [Rubeus](https://github.com/GhostP
 KrbRelayUp - Relaying you to SYSTEM
 
 RELAY:
-Usage: KrbRelayUp.exe relay -d FQDN -cn CUMPUTERNAME [-c] [-cp PASSWORD | -ch NTHASH]
+Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD | -ch NTHASH]
 
     -d  (--Domain)                   FQDN of domain.
     -c  (--CreateNewComputerAccount)    Create new computer account for RBCD. Will use the current authenticated user.
