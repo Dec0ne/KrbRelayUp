@@ -145,7 +145,7 @@ namespace KrbRelayUp
             if (rep.enc_part.etype != (int)etype)
             {
                 // maybe this should be a fatal error instead of just a warning?
-                Console.WriteLine($"[!] Warning: Supplied encyption key type is {etype} but AS-REP contains data encrypted with {(Interop.KERB_ETYPE)rep.enc_part.etype}");
+                Console.WriteLine($"[!] Warning: Supplied encryption key type is {etype} but AS-REP contains data encrypted with {(Interop.KERB_ETYPE)rep.enc_part.etype}");
             }
 
             // decrypt the enc_part containing the session key/etc.

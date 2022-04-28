@@ -146,7 +146,7 @@ namespace KrbRelayUp.Relay
                 if (port == "-1")
                 {
                     Console.WriteLine("[-] No available ports found");
-                    Console.WriteLine("[-] Firwall will block our COM connection. Exiting");
+                    Console.WriteLine("[-] Firewall will block our COM connection. Exiting");
                     return;
                 }
                 Console.WriteLine("[+] Port {0} available", port);
@@ -200,7 +200,7 @@ namespace KrbRelayUp.Relay
                 ticket = Helpers.ConvertApReq(ticket);
                 if (ticket[0] != 0x60)
                 {
-                    Console.WriteLine("[-] Recieved invalid apReq, exploit will fail");
+                    Console.WriteLine("[-] Received invalid apReq, exploit will fail");
                     Console.WriteLine("{0}", Helpers.ByteArrayToString(ticket));
                     Environment.Exit(0);
                 }

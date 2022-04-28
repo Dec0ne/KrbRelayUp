@@ -168,7 +168,7 @@ namespace KrbRelayUp
                 {
                     var winError = Interop.LsaNtStatusToWinError((uint)ProtocalStatus);
                     var errorMessage = new Win32Exception((int)winError).Message;
-                    Console.WriteLine("[X] Error {0} running LsaLookupAuthenticationPackage (ProtocalStatus): {1}", winError, errorMessage);
+                    Console.WriteLine("[X] Error {0} running LsaLookupAuthenticationPackage (ProtocolStatus): {1}", winError, errorMessage);
                     return;
                 }
                 Console.WriteLine("[+] Ticket successfully imported!");
