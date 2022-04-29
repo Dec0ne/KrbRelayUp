@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.IO;
 
 namespace KrbRelayUp.Kerberos.PAC
 {
@@ -15,7 +11,7 @@ namespace KrbRelayUp.Kerberos.PAC
 
         public SignatureData(PacInfoBufferType type)
         {
-            this.Type = type;
+            Type = type;
         }
 
         public SignatureData(byte[] data, PacInfoBufferType type) : base(data, type)

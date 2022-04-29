@@ -105,12 +105,12 @@ namespace KrbRelayUp
             // KERB-AD-RESTRICTION-ENTRY encoding
             // restriction-type       [0] Int32
             AsnElt adRestrictionEntryElt = AsnElt.MakeInteger(restriction_type);
-            AsnElt adRestrictionEntrySeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { adRestrictionEntryElt });
+            AsnElt adRestrictionEntrySeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { adRestrictionEntryElt });
             adRestrictionEntrySeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, adRestrictionEntrySeq);
 
             // restriction            [1] OCTET STRING
             AsnElt adRestrictionEntryDataElt = AsnElt.MakeBlob(restriction);
-            AsnElt adRestrictionEntryDataSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { adRestrictionEntryDataElt });
+            AsnElt adRestrictionEntryDataSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { adRestrictionEntryDataElt });
             adRestrictionEntryDataSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 1, adRestrictionEntryDataSeq);
 
             AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { adRestrictionEntrySeq, adRestrictionEntryDataSeq });

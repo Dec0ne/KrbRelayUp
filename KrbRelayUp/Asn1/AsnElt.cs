@@ -107,14 +107,8 @@ namespace Asn1
         int tagClass_;
         public int TagClass
         {
-            get
-            {
-                return tagClass_;
-            }
-            private set
-            {
-                tagClass_ = value;
-            }
+            get => tagClass_;
+            private set => tagClass_ = value;
         }
 
         /*
@@ -123,14 +117,8 @@ namespace Asn1
         int tagValue_;
         public int TagValue
         {
-            get
-            {
-                return tagValue_;
-            }
-            private set
-            {
-                tagValue_ = value;
-            }
+            get => tagValue_;
+            private set => tagValue_ = value;
         }
 
         /*
@@ -140,27 +128,15 @@ namespace Asn1
         AsnElt[] sub_;
         public AsnElt[] Sub
         {
-            get
-            {
-                return sub_;
-            }
-            private set
-            {
-                sub_ = value;
-            }
+            get => sub_;
+            private set => sub_ = value;
         }
 
         /*
          * The "constructed" flag: true for an elements with sub-elements,
          * false for a primitive element.
          */
-        public bool Constructed
-        {
-            get
-            {
-                return Sub != null;
-            }
-        }
+        public bool Constructed => Sub != null;
 
         /*
          * The value length. When the object is BER-encoded with an
@@ -311,13 +287,7 @@ namespace Asn1
         /*
          * Get a string representation of the tag class and value.
          */
-        public string TagString
-        {
-            get
-            {
-                return TagToString(TagClass, TagValue);
-            }
-        }
+        public string TagString => TagToString(TagClass, TagValue);
 
         static string TagToString(int tc, int tv)
         {
@@ -332,7 +302,7 @@ namespace Asn1
                 case PRIVATE:
                     return "PRIVATE:" + tv;
                 default:
-                    return String.Format("INVALID:{0}/{1}", tc, tv);
+                    return $"INVALID:{tc}/{tv}";
             }
 
             switch (tv)
@@ -844,9 +814,7 @@ namespace Asn1
             int vlen = ValueLength;
             if (off < 0 || len < 0 || len > (vlen - off))
             {
-                throw new AsnException(String.Format(
-                    "invalid value window {0}:{1}"
-                    + " (value length = {2})", off, len, vlen));
+                throw new AsnException($"invalid value window {off}:{len}" + $" (value length = {vlen})");
             }
             EncodeValue(off, off + len, dst, dstOff);
         }
@@ -908,8 +876,7 @@ namespace Asn1
             int vlen = ValueLength;
             if (vlen != 1)
             {
-                throw new AsnException(String.Format(
-                    "invalid BOOLEAN (length = {0})", vlen));
+                throw new AsnException($"invalid BOOLEAN (length = {vlen})");
             }
             return ValueByte(0) != 0;
         }
@@ -942,7 +909,7 @@ namespace Asn1
                         throw new AsnException(
                             "integer overflow (negative)");
                     }
-                    x = (x << 8) + (long)ValueByte(k);
+                    x = (x << 8) + ValueByte(k);
                 }
             }
             else
@@ -955,7 +922,7 @@ namespace Asn1
                         throw new AsnException(
                             "integer overflow (positive)");
                     }
-                    x = (x << 8) + (long)ValueByte(k);
+                    x = (x << 8) + ValueByte(k);
                 }
             }
             return x;
@@ -1052,7 +1019,7 @@ namespace Asn1
                 int orig = off;
                 foreach (AsnElt ae in Sub)
                 {
-                    ae.CheckTag(AsnElt.OCTET_STRING);
+                    ae.CheckTag(OCTET_STRING);
                     off += ae.GetOctetString(dst, off);
                 }
                 return off - orig;
@@ -1101,8 +1068,7 @@ namespace Asn1
             int fb = ValueByte(0);
             if (fb > 7 || (vlen == 1 && fb != 0))
             {
-                throw new AsnException(String.Format(
-                    "invalid BIT STRING (start = 0x{0:X2})", fb));
+                throw new AsnException($"invalid BIT STRING (start = 0x{fb:X2})");
             }
             byte[] r = new byte[vlen - 1];
             CopyValueChunk(1, vlen - 1, r, 0);
@@ -1126,8 +1092,7 @@ namespace Asn1
             }
             if (ValueLength != 0)
             {
-                throw new AsnException(String.Format(
-                    "invalid NULL (length = {0})", ValueLength));
+                throw new AsnException($"invalid NULL (length = {ValueLength})");
             }
         }
 
@@ -1162,7 +1127,7 @@ namespace Asn1
                     throw new AsnException(
                         "invalid OID: integer overflow");
                 }
-                acc = (acc << 7) + (long)(v & 0x7F);
+                acc = (acc << 7) + (v & 0x7F);
                 if ((v & 0x80) == 0)
                 {
                     sb.Append('.');
@@ -1889,7 +1854,7 @@ namespace Asn1
         static AsnException BadTime(int type, string s, Exception e)
         {
             string tt = (type == UTCTime) ? "UTCTime" : "GeneralizedTime";
-            string msg = String.Format("invalid {0} string: '{1}'", tt, s);
+            string msg = $"invalid {tt} string: '{s}'";
             if (e == null)
             {
                 return new AsnException(msg);
@@ -2194,7 +2159,7 @@ namespace Asn1
             a.TagValue = tagValue;
             if (subs == null)
             {
-                a.Sub = new AsnElt[0];
+                a.Sub = Array.Empty<AsnElt>();
             }
             else
             {
@@ -2222,7 +2187,7 @@ namespace Asn1
             a.TagValue = SET;
             if (subs == null)
             {
-                a.Sub = new AsnElt[0];
+                a.Sub = Array.Empty<AsnElt>();
             }
             else
             {
@@ -2259,7 +2224,7 @@ namespace Asn1
                 {
                     if (x[i] != y[i])
                     {
-                        return (int)x[i] - (int)y[i];
+                        return x[i] - y[i];
                     }
                 }
                 return xLen - yLen;
@@ -2303,12 +2268,12 @@ namespace Asn1
             return a;
         }
 
-        public static AsnElt NULL_V = AsnElt.MakePrimitive(
-            NULL, new byte[0]);
+        public static AsnElt NULL_V = MakePrimitive(
+            NULL, Array.Empty<byte>());
 
-        public static AsnElt BOOL_TRUE = AsnElt.MakePrimitive(
+        public static AsnElt BOOL_TRUE = MakePrimitive(
             BOOLEAN, new byte[] { 0xFF });
-        public static AsnElt BOOL_FALSE = AsnElt.MakePrimitive(
+        public static AsnElt BOOL_FALSE = MakePrimitive(
             BOOLEAN, new byte[] { 0x00 });
 
         /*
@@ -2336,9 +2301,7 @@ namespace Asn1
                 }
                 if (c < '0' || c > '9')
                 {
-                    throw new AsnException(String.Format(
-                        "invalid character U+{0:X4} in OID",
-                        c));
+                    throw new AsnException($"invalid character U+{c:X4} in OID");
                 }
                 if (x < 0)
                 {
@@ -2348,7 +2311,7 @@ namespace Asn1
                 {
                     throw new AsnException("OID element overflow");
                 }
-                x = x * (long)10 + (long)(c - '0');
+                x = x * 10 + (c - '0');
             }
             if (x < 0)
             {
@@ -2538,9 +2501,7 @@ namespace Asn1
                     int year = dt.Year;
                     if (year < 1950 || year >= 2050)
                     {
-                        throw new AsnException(String.Format(
-                            "cannot encode year {0} as UTCTime",
-                            year));
+                        throw new AsnException($"cannot encode year {year} as UTCTime");
                     }
                     year = year % 100;
                     str = String.Format(

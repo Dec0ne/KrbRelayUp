@@ -1,7 +1,5 @@
 ﻿using System;
 using Asn1;
-using System.Text;
-using System.Collections.Generic;
 
 namespace KrbRelayUp
 {
@@ -49,18 +47,18 @@ namespace KrbRelayUp
         {
             // cksumtype       [0] Int32
             AsnElt cksumtypeAsn = AsnElt.MakeInteger(cksumtype);
-            AsnElt cksumtypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { cksumtypeAsn });
+            AsnElt cksumtypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { cksumtypeAsn });
             cksumtypeSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, cksumtypeSeq);
 
 
             // checksum        [1] OCTET STRING
             AsnElt checksumAsn = AsnElt.MakeBlob(checksum);
-            AsnElt checksumSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { checksumAsn });
+            AsnElt checksumSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { checksumAsn });
             checksumSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 1, checksumSeq);
 
 
-            AsnElt totalSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { cksumtypeSeq, checksumSeq });
-            AsnElt totalSeq2 = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { totalSeq });
+            AsnElt totalSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { cksumtypeSeq, checksumSeq });
+            AsnElt totalSeq2 = AsnElt.Make(AsnElt.SEQUENCE, new[] { totalSeq });
             return totalSeq2;
         }
 

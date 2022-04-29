@@ -1,6 +1,5 @@
 ﻿using Asn1;
 using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace KrbRelayUp
@@ -69,12 +68,12 @@ namespace KrbRelayUp
             // addr-type[0] Int32
             // addr-string[1] OCTET STRING
             AsnElt addrTypeElt = AsnElt.MakeInteger((long)addr_type);
-            AsnElt addrTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { addrTypeElt });
+            AsnElt addrTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { addrTypeElt });
             addrTypeSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, addrTypeSeq);
 
             AsnElt addrStringElt = AsnElt.MakeString(AsnElt.TeletexString, addr_string);
             addrStringElt = AsnElt.MakeImplicit(AsnElt.UNIVERSAL, AsnElt.OCTET_STRING, addrStringElt);
-            AsnElt addrStringSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { addrStringElt });
+            AsnElt addrStringSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { addrStringElt });
             addrStringSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 1, addrStringSeq);
 
             AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { addrTypeSeq, addrStringSeq });

@@ -1,6 +1,4 @@
-﻿using System;
-using Asn1;
-using System.Collections.Generic;
+﻿using Asn1;
 
 namespace KrbRelayUp
 {
@@ -30,13 +28,13 @@ namespace KrbRelayUp
         {
             // pvno            [0] INTEGER (5)
             AsnElt pvnoAsn = AsnElt.MakeInteger(pvno);
-            AsnElt pvnoSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { pvnoAsn });
+            AsnElt pvnoSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { pvnoAsn });
             pvnoSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, pvnoSeq);
 
 
             // msg-type        [1] INTEGER (21)
             AsnElt msg_typeAsn = AsnElt.MakeInteger(msg_type);
-            AsnElt msg_typeSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { msg_typeAsn });
+            AsnElt msg_typeSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { msg_typeAsn });
             msg_typeSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 1, msg_typeSeq);
 
             // enc-part        [3] EncryptedData -- EncKrbPrivPart
@@ -44,26 +42,26 @@ namespace KrbRelayUp
 
             // etype
             AsnElt etypeAsn = AsnElt.MakeInteger((int)etype);
-            AsnElt etypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { etypeAsn });
+            AsnElt etypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { etypeAsn });
             etypeSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, etypeSeq);
 
             // now encrypt the enc_part (EncKrbPrivPart)
             //  KRB_KEY_USAGE_KRB_PRIV_ENCRYPTED_PART = 13;
             byte[] encBytes = Crypto.KerberosEncrypt(etype, Interop.KRB_KEY_USAGE_KRB_PRIV_ENCRYPTED_PART, ekey, enc_partAsn.Encode());
             AsnElt blob = AsnElt.MakeBlob(encBytes);
-            AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { blob });
+            AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { blob });
             blobSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 2, blobSeq);
 
-            AsnElt encPrivSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { etypeSeq, blobSeq });
-            AsnElt encPrivSeq2 = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { encPrivSeq });
+            AsnElt encPrivSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { etypeSeq, blobSeq });
+            AsnElt encPrivSeq2 = AsnElt.Make(AsnElt.SEQUENCE, new[] { encPrivSeq });
             encPrivSeq2 = AsnElt.MakeImplicit(AsnElt.CONTEXT, 3, encPrivSeq2);
 
 
             // all the components
-            AsnElt total = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { pvnoSeq, msg_typeSeq, encPrivSeq2 });
+            AsnElt total = AsnElt.Make(AsnElt.SEQUENCE, new[] { pvnoSeq, msg_typeSeq, encPrivSeq2 });
 
             // tag the final total ([APPLICATION 21])
-            AsnElt final = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { total });
+            AsnElt final = AsnElt.Make(AsnElt.SEQUENCE, new[] { total });
             final = AsnElt.MakeImplicit(AsnElt.APPLICATION, 21, final);
 
             return final;

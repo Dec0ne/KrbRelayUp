@@ -234,8 +234,8 @@ namespace KrbRelayUp
             if (additional_tickets.Count > 0)
             {
                 AsnElt ticketAsn = additional_tickets[0].Encode();
-                AsnElt ticketSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { ticketAsn });
-                AsnElt ticketSeq2 = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { ticketSeq });
+                AsnElt ticketSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { ticketAsn });
+                AsnElt ticketSeq2 = AsnElt.Make(AsnElt.SEQUENCE, new[] { ticketSeq });
                 ticketSeq2 = AsnElt.MakeImplicit(AsnElt.CONTEXT, 11, ticketSeq2);
                 allNodes.Add(ticketSeq2);
             }

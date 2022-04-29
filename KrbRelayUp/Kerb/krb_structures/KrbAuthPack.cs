@@ -1,4 +1,5 @@
-﻿using Asn1;
+﻿using System;
+using Asn1;
 using System.Security.Cryptography.X509Certificates;
 
 namespace KrbRelayUp
@@ -16,14 +17,14 @@ namespace KrbRelayUp
         {
             Authenticator = authenticator;
             Certificate = certificate;
-            ClientDHNonce = new byte[0];
+            ClientDHNonce = Array.Empty<byte>();
         }
 
         public AsnElt Encode()
         {
 
             return AsnElt.Make(AsnElt.SEQUENCE,
-                new AsnElt[] {
+                new[] {
                     AsnElt.Make(AsnElt.CONTEXT,0, Authenticator.Encode()),
                     AsnElt.Make(AsnElt.CONTEXT,1, ClientPublicValue.Encode() ),
                     //AsnElt.Make(AsnElt.CONTEXT,2, new AsnElt[]{ CMSTypes } ),

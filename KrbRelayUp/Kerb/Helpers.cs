@@ -1,15 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.DirectoryServices;
 using System.DirectoryServices.Protocols;
-using KrbRelayUp.lib.Interop;
 
 namespace KrbRelayUp
 {
@@ -59,7 +57,7 @@ namespace KrbRelayUp
             if ((hex.Length % 16) != 0)
             {
                 Console.WriteLine("\r\n[X] Hash must be 16, 32 or 64 characters in length\r\n");
-                System.Environment.Exit(1);
+                Environment.Exit(1);
             }
 
             // yes I know this inefficient
@@ -200,19 +198,19 @@ namespace KrbRelayUp
 
         #region File Helpers
 
-        static public string GetBaseFromFilename(string filename)
+        public static string GetBaseFromFilename(string filename)
         {
             return SplitBaseAndExtension(filename)[0];
         }
 
-        static public string GetExtensionFromFilename(string filename)
+        public static string GetExtensionFromFilename(string filename)
         {
             return SplitBaseAndExtension(filename)[1];
         }
 
         // Splits filename by into a basename and extension 
         // Returns an array representing [basename, extension]
-        static public string[] SplitBaseAndExtension(string filename)
+        public static string[] SplitBaseAndExtension(string filename)
         {
             string[] result = { filename, "" };
             string[] splitName = filename.Split('.');
@@ -226,7 +224,7 @@ namespace KrbRelayUp
             return result;
         }
 
-        static public string MakeValidFileName(string filePath)
+        public static string MakeValidFileName(string filePath)
         {
             // Can't use IO.Path.GetFileName and IO.Path.GetDirectoryName because they get confused by illegal file name characters (the whole reason we are here)
             string fileName = filePath;
@@ -277,7 +275,7 @@ namespace KrbRelayUp
             }
         }
 
-        static public int SearchBytePattern(byte[] pattern, byte[] bytes)
+        public static int SearchBytePattern(byte[] pattern, byte[] bytes)
         {
             List<int> positions = new List<int>();
             int patternLength = pattern.Length;
@@ -298,7 +296,7 @@ namespace KrbRelayUp
             return 0;
         }
 
-        static public bool WriteBytesToFile(string filename, byte[] data, bool overwrite = false)
+        public static bool WriteBytesToFile(string filename, byte[] data, bool overwrite = false)
         {
             bool result = true;
             string filePath = Path.GetFullPath(filename);
@@ -309,7 +307,7 @@ namespace KrbRelayUp
                 {
                     if (File.Exists(filePath))
                     {
-                        throw new Exception(String.Format("{0} already exists! Data not written to file.\r\n", filePath));
+                        throw new Exception($"{filePath} already exists! Data not written to file.\r\n");
                     }
                 }
                 File.WriteAllBytes(filePath, data);
@@ -348,7 +346,7 @@ namespace KrbRelayUp
             "msds-supportedencryptiontypes"
         };
 
-        static public List<IDictionary<string, Object>> GetADObjects(List<SearchResultEntry> searchResults)
+        public static List<IDictionary<string, Object>> GetADObjects(List<SearchResultEntry> searchResults)
         {
             var ActiveDirectoryObjects = new List<IDictionary<string, Object>>();
 
@@ -398,7 +396,7 @@ namespace KrbRelayUp
             return ActiveDirectoryObjects;
         }
 
-        static public List<IDictionary<string, Object>> GetADObjects(SearchResultCollection searchResults)
+        public static List<IDictionary<string, Object>> GetADObjects(SearchResultCollection searchResults)
         {
             var ActiveDirectoryObjects = new List<IDictionary<string, Object>>();
 

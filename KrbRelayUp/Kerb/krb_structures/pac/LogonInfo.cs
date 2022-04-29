@@ -1,8 +1,5 @@
 ﻿using KrbRelayUp.Ndr.Marshal;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using KrbRelayUp.Ndr;
 
 namespace KrbRelayUp.Kerberos.PAC

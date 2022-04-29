@@ -1,7 +1,5 @@
 ﻿using System;
 using Asn1;
-using System.Text;
-using System.Collections.Generic;
 
 namespace KrbRelayUp
 {
@@ -44,7 +42,7 @@ namespace KrbRelayUp
         {
             // keytype[0] Int32 -- actually encryption type --
             AsnElt keyTypeElt = AsnElt.MakeInteger(keytype);
-            AsnElt keyTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { keyTypeElt });
+            AsnElt keyTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { keyTypeElt });
             keyTypeSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, keyTypeSeq);
 
 

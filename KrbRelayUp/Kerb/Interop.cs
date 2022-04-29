@@ -1,7 +1,4 @@
 ﻿using System;
-using Asn1;
-using System.Text;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using KrbRelayUp.lib.Interop;
 
@@ -1492,7 +1489,7 @@ namespace KrbRelayUp
         public static extern int NetApiBufferFree(IntPtr Buffer);
 
         [DllImport("kernel32.dll")]
-        public extern static void GetSystemTime(ref SYSTEMTIME lpSystemTime);
+        public static extern void GetSystemTime(ref SYSTEMTIME lpSystemTime);
 
         // LSA functions
 

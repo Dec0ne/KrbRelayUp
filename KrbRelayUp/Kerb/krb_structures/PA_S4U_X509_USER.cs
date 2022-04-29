@@ -1,7 +1,4 @@
 ﻿using Asn1;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace KrbRelayUp
 {
@@ -41,7 +38,7 @@ namespace KrbRelayUp
             AsnElt checksumAsn = cksum.Encode();
             checksumAsn = AsnElt.MakeImplicit(AsnElt.CONTEXT, 1, checksumAsn);
 
-            AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { userIDSeq, checksumAsn });
+            AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { userIDSeq, checksumAsn });
 
             return seq;
         }

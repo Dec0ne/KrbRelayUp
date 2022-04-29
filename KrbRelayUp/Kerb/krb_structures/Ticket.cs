@@ -1,8 +1,6 @@
 ﻿using System;
 using Asn1;
 using System.Text;
-using System.Collections.Generic;
-using KrbRelayUp.Kerberos;
 
 namespace KrbRelayUp
 {
@@ -57,7 +55,7 @@ namespace KrbRelayUp
         {
             // tkt-vno         [0] INTEGER (5)
             AsnElt tkt_vnoAsn = AsnElt.MakeInteger(tkt_vno);
-            AsnElt tkt_vnoSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { tkt_vnoAsn });
+            AsnElt tkt_vnoSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { tkt_vnoAsn });
             tkt_vnoSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, tkt_vnoSeq);
 
 

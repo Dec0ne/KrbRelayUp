@@ -30,8 +30,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using System;
-
 namespace Mono.Math.Prime.Generator
 {
 
@@ -55,18 +53,9 @@ namespace Mono.Math.Prime.Generator
             }
         }
 
-        public virtual Prime.PrimalityTest PrimalityTest
-        {
-            get
-            {
-                return new Prime.PrimalityTest(PrimalityTests.RabinMillerTest);
-            }
-        }
+        public virtual PrimalityTest PrimalityTest => new PrimalityTest(PrimalityTests.RabinMillerTest);
 
-        public virtual int TrialDivisionBounds
-        {
-            get { return 4000; }
-        }
+        public virtual int TrialDivisionBounds => 4000;
 
         /// <summary>
         /// Performs primality tests on bi, assumes trial division has been done.
@@ -76,7 +65,7 @@ namespace Mono.Math.Prime.Generator
         /// <remarks>The speed of this method is dependent on Confidence</remarks>
         protected bool PostTrialDivisionTests(BigInteger bi)
         {
-            return PrimalityTest(bi, this.Confidence);
+            return PrimalityTest(bi, Confidence);
         }
 
         public abstract BigInteger GenerateNewPrime(int bits);

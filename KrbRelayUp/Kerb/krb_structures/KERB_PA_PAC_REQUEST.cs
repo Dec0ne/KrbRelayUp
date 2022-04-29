@@ -1,6 +1,4 @@
 ﻿using Asn1;
-using System;
-using System.Text;
 
 namespace KrbRelayUp
 {
@@ -35,7 +33,7 @@ namespace KrbRelayUp
                 ret = AsnElt.MakeBlob(new byte[] { 0x30, 0x05, 0xa0, 0x03, 0x01, 0x01, 0x00 });
             }
 
-            AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { ret });
+            AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { ret });
 
             return seq;
         }

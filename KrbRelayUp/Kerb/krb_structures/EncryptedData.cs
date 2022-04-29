@@ -1,7 +1,5 @@
 ﻿using System;
 using Asn1;
-using System.Text;
-using System.Collections.Generic;
 
 namespace KrbRelayUp
 {
@@ -56,13 +54,13 @@ namespace KrbRelayUp
         {
             // etype   [0] Int32 -- EncryptionType --,
             AsnElt etypeAsn = AsnElt.MakeInteger(etype);
-            AsnElt etypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { etypeAsn });
+            AsnElt etypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { etypeAsn });
             etypeSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, etypeSeq);
 
 
             // cipher  [2] OCTET STRING -- ciphertext
             AsnElt cipherAsn = AsnElt.MakeBlob(cipher);
-            AsnElt cipherSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { cipherAsn });
+            AsnElt cipherSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { cipherAsn });
             cipherSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 2, cipherSeq);
 
 
@@ -70,15 +68,15 @@ namespace KrbRelayUp
             {
                 // kvno    [1] UInt32 OPTIONAL
                 AsnElt kvnoAsn = AsnElt.MakeInteger(kvno);
-                AsnElt kvnoSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { kvnoAsn });
+                AsnElt kvnoSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { kvnoAsn });
                 kvnoSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 1, kvnoSeq);
 
-                AsnElt totalSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { etypeSeq, kvnoSeq, cipherSeq });
+                AsnElt totalSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { etypeSeq, kvnoSeq, cipherSeq });
                 return totalSeq;
             }
             else
             {
-                AsnElt totalSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { etypeSeq, cipherSeq });
+                AsnElt totalSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { etypeSeq, cipherSeq });
                 return totalSeq;
             }
         }

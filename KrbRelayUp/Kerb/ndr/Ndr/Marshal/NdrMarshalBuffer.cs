@@ -14,7 +14,6 @@
 
 using KrbRelayUp.Utilities.Text;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -76,7 +75,7 @@ namespace KrbRelayUp.Ndr.Marshal
         {
             if (array == null)
             {
-                array = new string[0];
+                array = Array.Empty<string>();
             }
 
             for (int i = 0; i < count; ++i)
@@ -146,7 +145,7 @@ namespace KrbRelayUp.Ndr.Marshal
         #endregion
 
         #region Constructors
-        public NdrMarshalBuffer() : this(new NdrDataRepresentation()
+        public NdrMarshalBuffer() : this(new NdrDataRepresentation
         {
             CharacterRepresentation = NdrCharacterRepresentation.ASCII,
             FloatingPointRepresentation = NdrFloatingPointRepresentation.IEEE,
@@ -790,7 +789,7 @@ namespace KrbRelayUp.Ndr.Marshal
             WriteInt32(0);
             if (array == null)
             {
-                array = new T[0];
+                array = Array.Empty<T>();
             }
             int var_int = (int)variance;
             if (var_int < 0)
@@ -899,7 +898,7 @@ namespace KrbRelayUp.Ndr.Marshal
             // Max Count
             if (array == null)
             {
-                array = new T[0];
+                array = Array.Empty<T>();
             }
             int var_int = (int)conformance;
             if (var_int < 0)

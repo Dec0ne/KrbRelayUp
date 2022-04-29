@@ -15,9 +15,7 @@
 //    along with OleViewDotNet.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace KrbRelayUp.Relay.Com
 {

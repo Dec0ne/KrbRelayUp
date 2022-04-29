@@ -1,5 +1,4 @@
-﻿using System;
-using Asn1;
+﻿using Asn1;
 using KrbRelayUp.Kerberos;
 
 namespace KrbRelayUp

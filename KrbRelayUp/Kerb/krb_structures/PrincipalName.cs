@@ -1,5 +1,4 @@
 ﻿using Asn1;
-using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -69,7 +68,7 @@ namespace KrbRelayUp
         {
             // name-type[0] Int32
             AsnElt nameTypeElt = AsnElt.MakeInteger((long)name_type);
-            AsnElt nameTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { nameTypeElt });
+            AsnElt nameTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { nameTypeElt });
             nameTypeSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, nameTypeSeq);
 
 

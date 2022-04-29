@@ -17,14 +17,8 @@
 // the original author James Forshaw to be used under the Apache License for this
 // project.
 
-using KrbRelayUp.Utilities.Memory;
-using KrbRelayUp.Win32;
 //using NtApiDotNet.Win32.Debugger;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace KrbRelayUp.Ndr
 {

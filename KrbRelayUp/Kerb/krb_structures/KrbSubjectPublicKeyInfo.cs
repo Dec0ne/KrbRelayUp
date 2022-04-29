@@ -17,7 +17,7 @@ namespace KrbRelayUp
         public AsnElt Encode()
         {
             return AsnElt.Make(
-                AsnElt.SEQUENCE, new AsnElt[] {
+                AsnElt.SEQUENCE, new[] {
                     Algorithm.Encode(),
                     AsnElt.MakeBitString(SubjectPublicKey)
             });

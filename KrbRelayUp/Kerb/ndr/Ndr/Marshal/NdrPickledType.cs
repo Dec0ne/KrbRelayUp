@@ -48,7 +48,7 @@ namespace KrbRelayUp.Ndr.Marshal
             // Padding.
             reader.ReadInt32();
             Data = reader.ReadAllBytes(length);
-            DataRepresentation = new NdrDataRepresentation()
+            DataRepresentation = new NdrDataRepresentation
             {
                 IntegerRepresentation = NdrIntegerRepresentation.LittleEndian,
                 CharacterRepresentation = NdrCharacterRepresentation.ASCII,

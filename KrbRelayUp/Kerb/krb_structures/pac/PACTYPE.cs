@@ -1,10 +1,6 @@
 ﻿using KrbRelayUp.Kerberos.PAC;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace KrbRelayUp.Kerberos
 {
@@ -87,7 +83,7 @@ namespace KrbRelayUp.Kerberos
 
                 byte[] pacBuffer = pacInfoBuffer.Encode();
                 bw.Write((int)pacInfoBuffer.Type);
-                bw.Write((int)pacBuffer.Length);
+                bw.Write(pacBuffer.Length);
                 bw.Write(offset);
 
                 long oldPosition = bw.BaseStream.Position;

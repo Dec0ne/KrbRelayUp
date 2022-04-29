@@ -99,7 +99,7 @@ namespace KrbRelayUp
             KrbPkAuthenticator authenticator = new KrbPkAuthenticator((uint)now.Millisecond, now, now.Millisecond, kdcRequestBody);
             KrbAuthPack authPack = new KrbAuthPack(authenticator, pkInitCert);
 
-            byte[] pubKeyInfo = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] {
+            byte[] pubKeyInfo = AsnElt.Make(AsnElt.SEQUENCE, new[] {
                 AsnElt.MakeInteger(agreement.P),
                 AsnElt.MakeInteger(agreement.G),
             }).Encode();
@@ -151,7 +151,7 @@ namespace KrbRelayUp
         {
             // padata-type     [1] Int32
             AsnElt typeElt = AsnElt.MakeInteger((long)type);
-            AsnElt nameTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { typeElt });
+            AsnElt nameTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { typeElt });
             nameTypeSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 1, nameTypeSeq);
 
             AsnElt paDataElt;
@@ -163,71 +163,71 @@ namespace KrbRelayUp
                 paDataElt = ((KERB_PA_PAC_REQUEST)value).Encode();
                 paDataElt = AsnElt.MakeImplicit(AsnElt.CONTEXT, 2, paDataElt);
 
-                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { nameTypeSeq, paDataElt });
+                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { nameTypeSeq, paDataElt });
                 return seq;
             }
             else if (type == Interop.PADATA_TYPE.ENC_TIMESTAMP)
             {
                 // used for AS-REQs
                 AsnElt blob = AsnElt.MakeBlob(((EncryptedData)value).Encode().Encode());
-                AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { blob });
+                AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { blob });
                 blobSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 2, blobSeq);
 
-                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { nameTypeSeq, blobSeq });
+                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { nameTypeSeq, blobSeq });
                 return seq;
             }
             else if (type == Interop.PADATA_TYPE.AP_REQ)
             {
                 // used for TGS-REQs
                 AsnElt blob = AsnElt.MakeBlob(((AP_REQ)value).Encode().Encode());
-                AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { blob });
+                AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { blob });
 
                 paDataElt = AsnElt.MakeImplicit(AsnElt.CONTEXT, 2, blobSeq);
 
-                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { nameTypeSeq, paDataElt });
+                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { nameTypeSeq, paDataElt });
                 return seq;
             }
             else if (type == Interop.PADATA_TYPE.S4U2SELF)
             {
                 // used for constrained delegation
                 AsnElt blob = AsnElt.MakeBlob(((PA_FOR_USER)value).Encode().Encode());
-                AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { blob });
+                AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { blob });
 
                 paDataElt = AsnElt.MakeImplicit(AsnElt.CONTEXT, 2, blobSeq);
 
-                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { nameTypeSeq, paDataElt });
+                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { nameTypeSeq, paDataElt });
                 return seq;
             }
             else if (type == Interop.PADATA_TYPE.PA_S4U_X509_USER)
             {
                 // used for constrained delegation
                 AsnElt blob = AsnElt.MakeBlob(((PA_S4U_X509_USER)value).Encode().Encode());
-                AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { blob });
+                AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { blob });
 
                 paDataElt = AsnElt.MakeImplicit(AsnElt.CONTEXT, 2, blobSeq);
 
-                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { nameTypeSeq, paDataElt });
+                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { nameTypeSeq, paDataElt });
                 return seq;
             }
             else if (type == Interop.PADATA_TYPE.PA_PAC_OPTIONS)
             {
                 AsnElt blob = AsnElt.MakeBlob(((PA_PAC_OPTIONS)value).Encode().Encode());
-                AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { blob });
+                AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { blob });
 
                 paDataElt = AsnElt.MakeImplicit(AsnElt.CONTEXT, 2, blobSeq);
 
-                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { nameTypeSeq, paDataElt });
+                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { nameTypeSeq, paDataElt });
                 return seq;
             }
             else if (type == Interop.PADATA_TYPE.PK_AS_REQ)
             {
 
                 AsnElt blob = AsnElt.MakeBlob(((PA_PK_AS_REQ)value).Encode().Encode());
-                AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { blob });
+                AsnElt blobSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { blob });
 
                 paDataElt = AsnElt.MakeImplicit(AsnElt.CONTEXT, 2, blobSeq);
 
-                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { nameTypeSeq, paDataElt });
+                AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { nameTypeSeq, paDataElt });
                 return seq;
             }
             else

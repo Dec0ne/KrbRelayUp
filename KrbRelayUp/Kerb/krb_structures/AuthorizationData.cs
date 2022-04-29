@@ -1,7 +1,4 @@
 ﻿using Asn1;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace KrbRelayUp
 {
@@ -29,12 +26,12 @@ namespace KrbRelayUp
         {
             // ad-type            [0] Int32
             AsnElt adTypeElt = AsnElt.MakeInteger((long)ad_type);
-            AsnElt adTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { adTypeElt });
+            AsnElt adTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { adTypeElt });
             adTypeSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, adTypeSeq);
 
             // ad-data            [1] OCTET STRING
             AsnElt adDataElt = AsnElt.MakeBlob(ad_data);
-            AsnElt adDataSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { adDataElt });
+            AsnElt adDataSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { adDataElt });
             adDataSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 1, adDataSeq);
 
             AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { adTypeSeq, adDataSeq });

@@ -1,6 +1,5 @@
 ﻿using System;
 using Asn1;
-using System.Text;
 using System.Collections.Generic;
 
 namespace KrbRelayUp
@@ -115,7 +114,7 @@ namespace KrbRelayUp
 
 
             // tag the final total
-            AsnElt final = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { seq });
+            AsnElt final = AsnElt.Make(AsnElt.SEQUENCE, new[] { seq });
             final = AsnElt.MakeImplicit(AsnElt.APPLICATION, 2, final);
 
             return final;

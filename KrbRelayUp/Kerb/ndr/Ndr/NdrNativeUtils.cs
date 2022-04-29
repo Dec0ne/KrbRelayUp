@@ -47,7 +47,7 @@ namespace KrbRelayUp.Ndr
 
             if (p == IntPtr.Zero)
             {
-                return new T[0];
+                return Array.Empty<T>();
             }
 
             IntPtr curr = p;
@@ -95,7 +95,7 @@ namespace KrbRelayUp.Ndr
 
         internal static RPC_VERSION ToRpcVersion(this Version version)
         {
-            return new RPC_VERSION() { MajorVersion = (ushort)version.Major, MinorVersion = (ushort)version.Minor };
+            return new RPC_VERSION { MajorVersion = (ushort)version.Major, MinorVersion = (ushort)version.Minor };
         }
 
         internal static int GetPrimitiveTypeSize<T>() where T : struct
@@ -487,7 +487,7 @@ namespace KrbRelayUp.Ndr
         {
             if (pTransferSyntax == IntPtr.Zero)
             {
-                return new RPC_SYNTAX_IDENTIFIER() { SyntaxGUID = NdrNativeUtils.DCE_TransferSyntax };
+                return new RPC_SYNTAX_IDENTIFIER { SyntaxGUID = NdrNativeUtils.DCE_TransferSyntax };
             }
             return reader.ReadStruct<RPC_SYNTAX_IDENTIFIER>(pTransferSyntax);
         }
@@ -496,7 +496,7 @@ namespace KrbRelayUp.Ndr
         {
             if (nCount == IntPtr.Zero || pSyntaxInfo == IntPtr.Zero)
             {
-                return new MIDL_SYNTAX_INFO[0];
+                return Array.Empty<MIDL_SYNTAX_INFO>();
             }
             return reader.ReadArray<MIDL_SYNTAX_INFO>(pSyntaxInfo, nCount.ToInt32());
         }
@@ -518,7 +518,7 @@ namespace KrbRelayUp.Ndr
         public RPC_SYNTAX_IDENTIFIER(Guid guid, ushort major, ushort minor)
         {
             SyntaxGUID = guid;
-            SyntaxVersion = new RPC_VERSION() { MajorVersion = major, MinorVersion = minor };
+            SyntaxVersion = new RPC_VERSION { MajorVersion = major, MinorVersion = minor };
         }
     }
 
@@ -611,7 +611,7 @@ namespace KrbRelayUp.Ndr
         {
             if (RpcProtseqEndpoint == IntPtr.Zero || RpcProtseqEndpointCount == 0)
             {
-                return new RPC_PROTSEQ_ENDPOINT[0];
+                return Array.Empty<RPC_PROTSEQ_ENDPOINT>();
             }
             return reader.ReadArray<RPC_PROTSEQ_ENDPOINT>(RpcProtseqEndpoint, RpcProtseqEndpointCount);
         }

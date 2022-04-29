@@ -1,8 +1,6 @@
 ﻿using System;
 using Asn1;
-using System.Collections.Generic;
 using System.Text;
-using System.IO;
 
 namespace KrbRelayUp
 {
@@ -49,7 +47,7 @@ namespace KrbRelayUp
 
             AsnElt new_passwordSeq;
             if (username == null)
-                new_passwordSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] {
+                new_passwordSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] {
                      AsnElt.MakeExplicit(AsnElt.CONTEXT, 0, new_passwordAsn),
                 });
             else
@@ -57,7 +55,7 @@ namespace KrbRelayUp
 
                 PrincipalName principal = new PrincipalName(username);
 
-                new_passwordSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] {
+                new_passwordSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] {
                     AsnElt.MakeExplicit(AsnElt.CONTEXT, 0, new_passwordAsn),
                     AsnElt.MakeImplicit(AsnElt.CONTEXT, 1, principal.Encode()),
                     AsnElt.MakeExplicit(AsnElt.CONTEXT, 2, AsnElt.MakeString(AsnElt.GeneralString, realm)),
@@ -68,21 +66,21 @@ namespace KrbRelayUp
 
             // seq-number      [3] UInt32 OPTIONAL
             AsnElt seq_numberAsn = AsnElt.MakeInteger(seq_number);
-            AsnElt seq_numberSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { seq_numberAsn });
+            AsnElt seq_numberSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { seq_numberAsn });
             seq_numberSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 3, seq_numberSeq);
 
             //  s-address       [4] HostAddress
             AsnElt hostAddressTypeAsn = AsnElt.MakeInteger(20);
-            AsnElt hostAddressTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { hostAddressTypeAsn });
+            AsnElt hostAddressTypeSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { hostAddressTypeAsn });
             hostAddressTypeSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 0, hostAddressTypeSeq);
 
             byte[] hostAddressAddressBytes = Encoding.ASCII.GetBytes(host_name);
             AsnElt hostAddressAddressAsn = AsnElt.MakeBlob(hostAddressAddressBytes);
-            AsnElt hostAddressAddressSeq = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { hostAddressAddressAsn });
+            AsnElt hostAddressAddressSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { hostAddressAddressAsn });
             hostAddressAddressSeq = AsnElt.MakeImplicit(AsnElt.CONTEXT, 1, hostAddressAddressSeq);
 
             AsnElt hostAddressSeq = AsnElt.Make(AsnElt.SEQUENCE, new[] { hostAddressTypeSeq, hostAddressAddressSeq });
-            AsnElt hostAddressSeq2 = AsnElt.Make(AsnElt.SEQUENCE, new AsnElt[] { hostAddressSeq });
+            AsnElt hostAddressSeq2 = AsnElt.Make(AsnElt.SEQUENCE, new[] { hostAddressSeq });
             hostAddressSeq2 = AsnElt.MakeImplicit(AsnElt.CONTEXT, 4, hostAddressSeq2);
 
             AsnElt seq = AsnElt.Make(AsnElt.SEQUENCE, new[] { new_passwordSeq, seq_numberSeq, hostAddressSeq2 });
