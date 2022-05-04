@@ -27,6 +27,7 @@ namespace KrbRelayUp
             Console.WriteLine("RELAY:");
             Console.WriteLine("Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD | -ch NTHASH]\n");
             Console.WriteLine("    -d  (--Domain)                   FQDN of domain.");
+            Console.WriteLine("    -d  (--DomainController)         FQDN/IP of domain controller. (Optional)");
             Console.WriteLine("    -c  (--CreateNewComputerAccount)    Create new computer account for RBCD. Will use the current authenticated user.");
             Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$ [if -c is enabled])");
             Console.WriteLine("    -cp (--ComputerPassword)         Password of computer account for RBCD. (default=RANDOM [if -c is enabled])");
@@ -37,6 +38,7 @@ namespace KrbRelayUp
             Console.WriteLine("SPAWN:");
             Console.WriteLine("Usage: KrbRelayUp.exe spawn -d FQDN -cn COMPUTERNAME [-cp PASSWORD | -ch NTHASH] <-i USERTOIMPERSONATE>\n");
             Console.WriteLine("    -d  (--Domain)                   FQDN of domain.");
+            Console.WriteLine("    -d  (--DomainController)         FQDN/IP of domain controller. (Optional)");
             Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$ [if -c is enabled])");
             Console.WriteLine("    -cp (--ComputerPassword)         Password of computer account for RBCD. (default=RANDOM [if -c is enabled])");
             Console.WriteLine("    -ch (--ComputerPasswordHash)     Password NT hash of computer account for RBCD. (Optional)");
@@ -75,6 +77,7 @@ namespace KrbRelayUp
 
             // parse args
             int iDomain = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(d|Domain)$").Match(s).Success);
+            int iDomainController = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(dc|DomainController)$").Match(s).Success);
             int iCreateNewComputerAccount = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(c|CreateNewComputerAccount)$").Match(s).Success);
             int iComputerName = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(cn|ComputerName)$").Match(s).Success);
             int iComputerPassword = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(cp|ComputerPassword)$").Match(s).Success);
@@ -105,7 +108,19 @@ namespace KrbRelayUp
 
             domain = args[iDomain + 1];
 
-            domainController = Networking.GetDCName(domain);
+            if (iDomainController != -1)
+                domainController = Networking.GetDCNameFromIP(args[iDomainController + 1]);
+            
+            if (String.IsNullOrEmpty(domainController))
+            {
+                domainController = Networking.GetDCName(domain);
+                if (String.IsNullOrEmpty(domainController))
+                {
+                    Console.WriteLine("[-] Could not find Domain Controller FQDN. Try specifying it with --DomainController flag.");
+                    return;
+                }
+
+            }
 
             foreach (string dc in domain.Split('.'))
             {

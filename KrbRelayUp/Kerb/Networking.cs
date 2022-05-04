@@ -37,18 +37,10 @@ namespace KrbRelayUp
             }
             else
             {
-                try
-                {
-                    string pdc = System.DirectoryServices.ActiveDirectory.Domain.GetCurrentDomain().PdcRoleOwner.Name;
-                    return pdc;
-                }
-                catch
-                {
-                    string errorMessage = new Win32Exception(val).Message;
-                    Console.WriteLine("\r\n [X] Error {0} retrieving domain controller : {1}", val, errorMessage);
-                    Interop.NetApiBufferFree(pDCI);
-                    return "";
-                }
+                string errorMessage = new Win32Exception(val).Message;
+                Console.WriteLine($"[-] Error 0x{val:X8} retrieving domain controller : {errorMessage}");
+                Interop.NetApiBufferFree(pDCI);
+                return "";
             }
         }
 
