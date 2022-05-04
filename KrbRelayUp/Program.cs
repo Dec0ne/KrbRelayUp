@@ -25,32 +25,31 @@ namespace KrbRelayUp
         public static void GetHelp()
         {
             Console.WriteLine("RELAY:");
-            Console.WriteLine("Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD | -ch NTHASH]\n");
+            Console.WriteLine("Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD]\n");
             Console.WriteLine("    -d  (--Domain)                   FQDN of domain.");
-            Console.WriteLine("    -dc  (--DomainController)         FQDN/IP of domain controller. (Optional)");
-            Console.WriteLine("    -c  (--CreateNewComputerAccount)    Create new computer account for RBCD. Will use the current authenticated user.");
+            Console.WriteLine("    -dc (--DomainController)         FQDN/IP of domain controller. (Optional)");
+            Console.WriteLine("    -c  (--CreateNewComputerAccount) Create new computer account for RBCD. Will use the current authenticated user.");
             Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$ [if -c is enabled])");
             Console.WriteLine("    -cp (--ComputerPassword)         Password of computer account for RBCD. (default=RANDOM [if -c is enabled])");
-            Console.WriteLine("    -ch (--ComputerPasswordHash)     Password NT hash of computer account for RBCD. (Optional)");
             Console.WriteLine("    -p  (--Port)                     Port for Com Server (default=12345)");
-            
+
             Console.WriteLine("");
             Console.WriteLine("SPAWN:");
-            Console.WriteLine("Usage: KrbRelayUp.exe spawn -d FQDN -cn COMPUTERNAME [-cp PASSWORD | -ch NTHASH] <-i USERTOIMPERSONATE>\n");
+            Console.WriteLine("Usage: KrbRelayUp.exe spawn -d FQDN -cn COMPUTERNAME [-cp PASSWORD | -ch NTHASH] [-i USERTOIMPERSONATE]\n");
             Console.WriteLine("    -d  (--Domain)                   FQDN of domain.");
-            Console.WriteLine("    -d  (--DomainController)         FQDN/IP of domain controller. (Optional)");
-            Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$ [if -c is enabled])");
-            Console.WriteLine("    -cp (--ComputerPassword)         Password of computer account for RBCD. (default=RANDOM [if -c is enabled])");
+            Console.WriteLine("    -dc (--DomainController)         FQDN/IP of domain controller. (Optional)");
+            Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$)");
+            Console.WriteLine("    -cp (--ComputerPassword)         Password of computer account for RBCD.");
             Console.WriteLine("    -ch (--ComputerPasswordHash)     Password NT hash of computer account for RBCD. (Optional)");
             Console.WriteLine("    -i  (--Impersonate)              User to impersonate. should be a local administrator in the target computer. (default=Administrator)");
             Console.WriteLine("    -s  (--ServiceName)              Name of the service to be created. (default=KrbSCM)");
-            Console.WriteLine("    -sc (--ServiceCommand)           Service command [binPath]. (default = spawn cmd.exe as SYSTEM");
+            Console.WriteLine("    -sc (--ServiceCommand)           Service command [binPath]. (default = spawn cmd.exe as SYSTEM)");
 
             Console.WriteLine("");
             Console.WriteLine("KRBSCM:");
-            Console.WriteLine("Usage: KrbRelayUp.exe krbscm <-s SERVICENAME> <-sc SERVICECOMMANDLINE>\n");
+            Console.WriteLine("Usage: KrbRelayUp.exe krbscm [-s SERVICENAME] [-sc SERVICECOMMANDLINE]\n");
             Console.WriteLine("    -s  (--ServiceName)              Name of the service to be created. (default=KrbSCM)");
-            Console.WriteLine("    -sc (--ServiceCommand)           Service command [binPath]. (default = spawn cmd.exe as SYSTEM");
+            Console.WriteLine("    -sc (--ServiceCommand)           Service command [binPath]. (default = spawn cmd.exe as SYSTEM)");
 
             Console.WriteLine("");
         }
@@ -110,7 +109,7 @@ namespace KrbRelayUp
 
             if (iDomainController != -1)
                 domainController = Networking.GetDCNameFromIP(args[iDomainController + 1]);
-            
+
             if (String.IsNullOrEmpty(domainController))
             {
                 domainController = Networking.GetDCName(domain);
@@ -119,8 +118,14 @@ namespace KrbRelayUp
                     Console.WriteLine("[-] Could not find Domain Controller FQDN. Try specifying it with --DomainController flag.");
                     return;
                 }
-
             }
+
+            if (args[0].ToLower() == "relay")
+            {
+                // Initialize the COM server for Kerberos relay
+                Relay.Relay.InitializeCOMServer($"ldap/{domainController}");
+            }
+
 
             foreach (string dc in domain.Split('.'))
             {

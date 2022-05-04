@@ -17,28 +17,29 @@ Simple wrapper around some of the features of [Rubeus](https://github.com/GhostP
 KrbRelayUp - Relaying you to SYSTEM
 
 RELAY:
-Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD | -ch NTHASH]
+Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD]
 
     -d  (--Domain)                   FQDN of domain.
-    -c  (--CreateNewComputerAccount)    Create new computer account for RBCD. Will use the current authenticated user.
-    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (deafult=KRBRELAYUP$ [if -c is enabled])
-    -cp (--ComputerPassword)         Password of computer account for RBCD. (deafult=RANDOM [if -c is enabled])
-    -ch (--ComputerPasswordHash)     Password NT hash of computer account for RBCD. (Optional)
+    -dc (--DomainController)         FQDN/IP of domain controller. (Optional)
+    -c  (--CreateNewComputerAccount) Create new computer account for RBCD. Will use the current authenticated user.
+    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$ [if -c is enabled])
+    -cp (--ComputerPassword)         Password of computer account for RBCD. (default=RANDOM [if -c is enabled])
     -p  (--Port)                     Port for Com Server (default=12345)
 
 SPAWN:
-Usage: KrbRelayUp.exe spawn -d FQDN -cn COMPUTERNAME [-cp PASSWORD | -ch NTHASH] <-i USERTOIMPERSONATE>
+Usage: KrbRelayUp.exe spawn -d FQDN -cn COMPUTERNAME [-cp PASSWORD | -ch NTHASH] [-i USERTOIMPERSONATE]
 
     -d  (--Domain)                   FQDN of domain.
-    -cn (--ComputerName)             Name of attacker owned computer account for RBCD.
+    -dc (--DomainController)         FQDN/IP of domain controller. (Optional)
+    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$)
     -cp (--ComputerPassword)         Password of computer account for RBCD.
     -ch (--ComputerPasswordHash)     Password NT hash of computer account for RBCD. (Optional)
-    -i  (--Impersonate)              User to impersonate. should be a local admininstrator in the target computer. (default=Administrator)
+    -i  (--Impersonate)              User to impersonate. should be a local administrator in the target computer. (default=Administrator)
     -s  (--ServiceName)              Name of the service to be created. (default=KrbSCM)
     -sc (--ServiceCommand)           Service command [binPath]. (default = spawn cmd.exe as SYSTEM)
 
 KRBSCM:
-Usage: KrbRelayUp.exe krbscm <-s SERVICENAME> <-sc SERVICECOMMANDLINE>
+Usage: KrbRelayUp.exe krbscm [-s SERVICENAME] [-sc SERVICECOMMANDLINE]
 
     -s  (--ServiceName)              Name of the service to be created. (default=KrbSCM)
     -sc (--ServiceCommand)           Service command [binPath]. (default = spawn cmd.exe as SYSTEM)
