@@ -27,7 +27,7 @@ namespace KrbRelayUp
             Console.WriteLine("RELAY:");
             Console.WriteLine("Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD | -ch NTHASH]\n");
             Console.WriteLine("    -d  (--Domain)                   FQDN of domain.");
-            Console.WriteLine("    -d  (--DomainController)         FQDN/IP of domain controller. (Optional)");
+            Console.WriteLine("    -dc  (--DomainController)         FQDN/IP of domain controller. (Optional)");
             Console.WriteLine("    -c  (--CreateNewComputerAccount)    Create new computer account for RBCD. Will use the current authenticated user.");
             Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$ [if -c is enabled])");
             Console.WriteLine("    -cp (--ComputerPassword)         Password of computer account for RBCD. (default=RANDOM [if -c is enabled])");
