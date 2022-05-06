@@ -61,6 +61,20 @@
     <Compile Include="Asn1\AsnException.cs" />
     <Compile Include="Asn1\AsnIO.cs" />
     <Compile Include="Asn1\AsnOID.cs" />
+    <Compile Include="DSInternals.Common\Data\DNWithBinary.cs" />
+    <Compile Include="DSInternals.Common\Data\Hello\CustomKeyInformation.cs" />
+    <Compile Include="DSInternals.Common\Data\Hello\KeyCredential.cs" />
+    <Compile Include="DSInternals.Common\Data\Hello\KeyCredentialEntryType.cs" />
+    <Compile Include="DSInternals.Common\Data\Hello\KeyCredentialVersion.cs" />
+    <Compile Include="DSInternals.Common\Data\Hello\KeyFlags.cs" />
+    <Compile Include="DSInternals.Common\Data\Hello\KeySource.cs" />
+    <Compile Include="DSInternals.Common\Data\Hello\KeyStrength.cs" />
+    <Compile Include="DSInternals.Common\Data\Hello\KeyUsage.cs" />
+    <Compile Include="DSInternals.Common\Data\Hello\VolumeType.cs" />
+    <Compile Include="DSInternals.Common\Extensions\ByteArrayExtensions.cs" />
+    <Compile Include="DSInternals.Common\Extensions\RSAExtensions.cs" />
+    <Compile Include="DSInternals.Common\Properties\Resources.Designer.cs" />
+    <Compile Include="DSInternals.Common\Validator.cs" />
     <Compile Include="KrbSCM.cs" />
     <Compile Include="Kerb\Crypto.cs" />
     <Compile Include="Kerb\crypto\dh\DiffieHellmanKey.cs" />
@@ -166,6 +180,7 @@
     <Compile Include="Kerb\ndr\Win32\Rpc\RpcUtils.cs" />
     <Compile Include="Kerb\Networking.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Relay\Attacks\ShadowCred.cs" />
     <Compile Include="Relay\Com\COMInterfaces.cs" />
     <Compile Include="Relay\Com\COMObjRef.cs" />
     <Compile Include="Relay\Com\COMUtilities.cs" />
@@ -188,7 +203,9 @@
     <Compile Include="Relay\Relay.cs" />
     <Compile Include="S4U.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="DSInternals.Common\Properties\Resources.resx" />
+  </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>

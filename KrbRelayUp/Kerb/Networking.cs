@@ -14,6 +14,56 @@ namespace KrbRelayUp
 {
     public class Networking
     {
+
+        public static bool GetDomainInfo()
+        {
+            // retrieves the current domain name
+            try
+            {
+                // adapted from https://www.pinvoke.net/default.aspx/netapi32.dsgetdcname
+                Interop.DOMAIN_CONTROLLER_INFO domainInfo;
+                const int ERROR_SUCCESS = 0;
+                IntPtr pDCI = IntPtr.Zero;
+
+                int val = Interop.DsGetDcName("", Options.domain, 0, "",
+                    Interop.DSGETDCNAME_FLAGS.DS_DIRECTORY_SERVICE_REQUIRED |
+                    Interop.DSGETDCNAME_FLAGS.DS_RETURN_DNS_NAME |
+                    Interop.DSGETDCNAME_FLAGS.DS_IP_REQUIRED, out pDCI);
+                if (ERROR_SUCCESS == val)
+                {
+                    domainInfo = (Interop.DOMAIN_CONTROLLER_INFO)Marshal.PtrToStructure(pDCI, typeof(Interop.DOMAIN_CONTROLLER_INFO));
+                    if (String.IsNullOrEmpty(Options.domain))
+                        Options.domain = domainInfo.DomainName;
+                    if (String.IsNullOrEmpty(Options.domainController))
+                        Options.domainController = domainInfo.DomainControllerName.Trim('\\');
+                    Interop.NetApiBufferFree(pDCI);
+                    return true;
+                }
+                else
+                {
+                    string errorMessage = new Win32Exception(val).Message;
+                    Console.WriteLine($"[-] Error 0x{val:X8} retrieving domain info : {errorMessage}");
+                    Interop.NetApiBufferFree(pDCI);
+                }
+            }
+            catch
+            { }
+            Console.WriteLine("[-] Unable to retrieve the domain information, try again with '--Domain' and '--DomainController'.");
+            return false;
+        }
+
+        public static string GetDomainDN(string domainFQDN)
+        {
+            string domainDN = "";
+            var domainComponent = domainFQDN.Split('.');
+            foreach (string dc in domainComponent)
+            {
+                domainDN += string.Concat(",DC=", dc);
+            }
+            domainDN = domainDN.TrimStart(',');
+            return domainDN;
+        }
+
         public static string GetDCName(string domainName = "")
         {
             // retrieves the current domain controller name
@@ -55,7 +105,7 @@ namespace KrbRelayUp
             {
                 if (display)
                 {
-                    Console.WriteLine("[*] Using domain controller: {0}", DCName);
+                    Console.WriteLine("[+] Using domain controller: {0}", DCName);
                 }
                 return DCName;
             }
@@ -77,7 +127,7 @@ namespace KrbRelayUp
                         {
                             if (display)
                             {
-                                Console.WriteLine("[*] Using domain controller: {0} ({1})", DCName, dcIP);
+                                Console.WriteLine("[+] Using domain controller: {0} ({1})", DCName, dcIP);
                             }
                             return $"{dcIP}";
                         }
@@ -105,7 +155,7 @@ namespace KrbRelayUp
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("[X] Error resolving IP address '{0}' to a name: {1}", IP, e.Message);
+                    Console.WriteLine($"[-] Error resolving IP address '{IP}' to a name: {e.Message}");
                     return null;
                 }
             }
@@ -255,7 +305,7 @@ namespace KrbRelayUp
                 //    }
                 //    else
                 //    {
-                //        Console.WriteLine("[*] Using alternate creds  : {0}", userDomain);
+                //        Console.WriteLine("[+] Using alternate creds  : {0}", userDomain);
                 //    }
                 //}
             }
@@ -317,7 +367,7 @@ namespace KrbRelayUp
 
                 try
                 {
-                    Console.WriteLine("[*] Searching path '{0}' for '{1}'", OUName, filter);
+                    Console.WriteLine("[+] Searching path '{0}' for '{1}'", OUName, filter);
                     PageResultRequestControl pageRequestControl = new PageResultRequestControl(maxResultsToRequest);
                     PageResultResponseControl pageResponseControl;
                     SearchRequest request = new SearchRequest(OUName, filter, SearchScope.Subtree, null);
@@ -375,11 +425,11 @@ namespace KrbRelayUp
                     string dirPath = directoryObject.Path;
                     if (String.IsNullOrEmpty(dirPath))
                     {
-                        Console.WriteLine("[*] Searching the current domain for '{0}'", filter);
+                        Console.WriteLine("[+] Searching the current domain for '{0}'", filter);
                     }
                     else
                     {
-                        Console.WriteLine("[*] Searching path '{0}' for '{1}'", dirPath, filter);
+                        Console.WriteLine("[+] Searching path '{0}' for '{1}'", dirPath, filter);
                     }
                 }
                 catch (DirectoryServicesCOMException ex)
@@ -510,14 +560,14 @@ namespace KrbRelayUp
 
                 NetResourceInstance.RemoteName = targetPath;
 
-                Console.WriteLine("[*] Attempting to mount: {0}", targetPath);
+                Console.WriteLine("[+] Attempting to mount: {0}", targetPath);
 
 
                 int result = Interop.WNetAddConnection2(NetResourceInstance, password, user, 4);
 
                 if (result == (int)Interop.SystemErrorCodes.ERROR_SUCCESS)
                 {
-                    Console.WriteLine("[*] {0} successfully mounted", targetPath);
+                    Console.WriteLine("[+] {0} successfully mounted", targetPath);
                 }
                 else
                 {
@@ -546,12 +596,12 @@ namespace KrbRelayUp
 
             foreach (string targetPath in paths)
             {
-                Console.WriteLine("[*] Attempting to unmount: {0}", targetPath);
+                Console.WriteLine("[+] Attempting to unmount: {0}", targetPath);
                 int result = Interop.WNetCancelConnection2(targetPath, 0, true);
 
                 if (result == 0)
                 {
-                    Console.WriteLine("[*] {0} successfully unmounted", targetPath);
+                    Console.WriteLine("[+] {0} successfully unmounted", targetPath);
                 }
                 else
                 {

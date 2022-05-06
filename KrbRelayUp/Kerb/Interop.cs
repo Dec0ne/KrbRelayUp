@@ -1579,7 +1579,7 @@ namespace KrbRelayUp
         public static extern bool GetTokenInformation(
             IntPtr TokenHandle,
             TOKEN_INFORMATION_CLASS TokenInformationClass,
-            IntPtr TokenInformation,
+            out TOKEN_STATISTICS TokenInformation,
             int TokenInformationLength,
             out int ReturnLength);
 
@@ -1601,6 +1601,11 @@ namespace KrbRelayUp
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool CloseHandle(
             IntPtr hObject
+        );
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern int ResumeThread(
+            IntPtr hThread
         );
 
         [DllImport("Secur32.dll", SetLastError = false)]

