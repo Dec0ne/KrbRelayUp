@@ -190,7 +190,7 @@ namespace KrbRelayUp
             int iServiceName = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(s|ServiceName)$").Match(s).Success);
             int iServiceCommand = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(sc|ServiceCommand)$").Match(s).Success);
             Options.serviceName = (iServiceName != -1) ? args[iServiceName + 1] : Options.serviceName;
-            Options.serviceCommand = (iServiceName != -1) ? args[iServiceName + 1] : Options.serviceCommand;
+            Options.serviceCommand = (iServiceCommand != -1) ? args[iServiceCommand + 1] : Options.serviceCommand;
 
         }
 
@@ -331,7 +331,12 @@ namespace KrbRelayUp
 
                 if (Options.phase == Options.PhaseType.Full || Options.useCreateNetOnly)
                 {
-                    Helpers.CreateProcessNetOnly($"{System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName} krbscm", show: false, kirbiBytes: bFinalTicket);
+                    string finalCommand = $"{System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName} krbscm";
+                    if (!String.IsNullOrEmpty(Options.serviceName))
+                        finalCommand = $"{finalCommand} --ServiceName \"{Options.serviceName}\"";
+                    if (!String.IsNullOrEmpty(Options.serviceCommand))
+                        finalCommand = $"{finalCommand} --ServiceCommand \"{Options.serviceCommand}\"";
+                    Helpers.CreateProcessNetOnly(finalCommand, show: false, kirbiBytes: bFinalTicket);
                 }
                 else
                 {
