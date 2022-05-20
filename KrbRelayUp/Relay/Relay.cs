@@ -14,7 +14,7 @@ namespace KrbRelayUp.Relay
 {
     class Relay
     {
-        public static Guid clsId_guid = new Guid("90f18417-f0f1-484e-9d3c-59dceee5dbd8");
+        public static Guid clsId_guid = new Guid(Options.clsid);
         public static SECURITY_HANDLE ldap_phCredential = new SECURITY_HANDLE();
         public static IntPtr ld = IntPtr.Zero;
         public static byte[] apRep1 = { };

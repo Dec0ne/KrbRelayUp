@@ -32,6 +32,7 @@ Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD | -ch NT
 
     -m   (--Method)                   Abuse method to use in after a successful relay to LDAP <rbcd/shadowcred> (default=rbcd)
     -p   (--Port)                     Port for Com Server (default=12345)
+    -cls (--Clsid)                    CLSID to use for coercing Kerberos auth from local machine account (default=90f18417-f0f1-484e-9d3c-59dceee5dbd8)
 
     # RBCD Method:
     -c   (--CreateNewComputerAccount) Create new computer account for RBCD. Will use the current authenticated user.
@@ -65,6 +66,7 @@ General Options:
     -dc (--DomainController)         FQDN of domain controller. (Optional)
     -ssl                             Use LDAP over SSL. (Optional)
     -n                               Use CreateNetOnly (needs to be on disk) instead of PTT when importing ST (enabled if using FULL mode)
+    -v  (--Verbose)                  Show verbose output. (Optional)
 
 
 KRBSCM: Will use the currently loaded Kerberos Service Ticket to create a new service running as SYSTEM.

