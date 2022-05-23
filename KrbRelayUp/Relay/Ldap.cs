@@ -7,12 +7,6 @@ namespace KrbRelayUp.Relay
 {
     public class Ldap
     {
-        public enum RelayAttackType
-        {
-            RBCD = 1,
-            ShadowCred = 2
-        }
-
         public static void Relay()
         {
             //create berval struct with the kerberos ticket

