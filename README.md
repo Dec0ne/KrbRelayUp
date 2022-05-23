@@ -15,12 +15,16 @@ Simple wrapper around some of the features of [Rubeus](https://github.com/GhostP
 ### Update - Shadow Credentials Support
 I added some features to support this attack primitive using shadow credentials. Note this eliminates the need for adding (or owning) another machine account.
 
+***Note***: *this attack method bypasses the Protected Users (or 'Account is sensitive and cannot be delegated') mitigation due to the S4U2Self abuse.*
+
 1. Local machine account auth coercion ([KrbRelay](https://github.com/cube0x0/KrbRelay))
 2. Kerberos relay to LDAP ([KrbRelay](https://github.com/cube0x0/KrbRelay))
 3. Generate new KeyCredential and add it to the local machine account's 'msDS-KeyCredentialLink' attribute. ([Whisker](https://github.com/eladshamir/Whisker) and [KrbRelay](https://github.com/cube0x0/KrbRelay))
 4. Using said KeyCredential to obtain a TGT for the local machine account via PKInit. ([Rubeus](https://github.com/GhostPack/Rubeus/))
 5. Using the TGT to obtain privileged ST to local machine via S4U2Self and TGSSUB. ([Rubeus](https://github.com/GhostPack/Rubeus/))
 6. Using said ST to authenticate to local Service Manager and create a new service as NT/SYSTEM. ([SCMUACBypass](https://gist.github.com/tyranid/c24cfd1bd141d14d4925043ee7e03c82))
+
+**UPDATE:** [Here](https://icyguider.github.io/2022/05/19/NoFix-LPE-Using-KrbRelay-With-Shadow-Credentials.html) is an excellent writeup by [@icyguider](https://twitter.com/icyguider) on how to perform the ShadowCred method of this attack manually (using the **original tools** for this attack path: [KrbRelay](https://github.com/cube0x0/KrbRelay), [Rubeus](https://github.com/GhostPack/Rubeus) and [SCMUACBypass](https://gist.github.com/tyranid/c24cfd1bd141d14d4925043ee7e03c82)) along with the usage of [NimCrypt2](https://github.com/icyguider/Nimcrypt2) to pack the various tools and evade some detection by defensive mechanism.
 
 ## Usage
 ```
