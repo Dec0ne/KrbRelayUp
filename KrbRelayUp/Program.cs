@@ -207,7 +207,9 @@ namespace KrbRelayUp
             {
                 try
                 {
-                    Options.caEndpoint = new Uri(Options.caEndpoint).Host;
+                    //Options.caEndpoint = new Uri(Options.caEndpoint).Host; <- This somewhat messed with the execuutionflow when a users enters httpx://server.domain.bla/bla
+                    //new method with regex insted of Uri.host method
+                    Options.caEndpoint = Regex.Replace(Options.caEndpoint, @"^([a-zA-Z]+:\/\/)?([^\/]+)\/.*?$", "$2");
                 }
                 catch { }
             }
