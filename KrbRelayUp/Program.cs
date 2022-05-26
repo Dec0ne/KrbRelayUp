@@ -95,7 +95,7 @@ namespace KrbRelayUp
             Console.WriteLine("    -f   (--ForceShadowCred)          Clear the msDS-KeyCredentialLink attribute of the attacked computer account before adding our new shadow credentials. (Optional)");
             Console.WriteLine("");
             Console.WriteLine("    # ADCS Method:");
-            Console.WriteLine("    -ca  (--CAEndpoint)               CA endpoint (default = same as DC)");
+            Console.WriteLine("    -ca  (--CAEndpoint)               CA endpoint FQDN (default = same as DC)");
             Console.WriteLine("    -https                            Connect to CA endpoint over secure HTTPS instead of HTTP");
             Console.WriteLine("    -cet (--CertificateTemplate)      Certificate template to request for (default=Machine)");
 

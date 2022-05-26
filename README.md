@@ -61,7 +61,7 @@ Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD | -ch NT
     -f   (--ForceShadowCred)          Clear the msDS-KeyCredentialLink attribute of the attacked computer account before adding our new shadow credentials. (Optional)
 
     # ADCS Method:
-    -ca  (--CAEndpoint)               CA endpoint (default = same as DC)
+    -ca  (--CAEndpoint)               CA endpoint FQDN (default = same as DC)
     -https                            Connect to CA endpoint over secure HTTPS instead of HTTP)
     -cet (--CertificateTemplate)      Certificate template to request for (default=Machine)
 
