@@ -291,8 +291,19 @@ namespace KrbRelayUp
                 // Bind to LDAP using current authenticated user
                 LdapDirectoryIdentifier identifier = new LdapDirectoryIdentifier(Options.domainController, Options.ldapPort);
                 LdapConnection ldapConnection = new LdapConnection(identifier);
-                ldapConnection.SessionOptions.Sealing = true;
-                ldapConnection.SessionOptions.Signing = true;
+                
+                // spoppi make SSL work 
+                if (Options.useSSL)
+                {
+                    ldapConnection.SessionOptions.ProtocolVersion = 3;
+                    ldapConnection.SessionOptions.SecureSocketLayer = true;
+                }
+                else // test showed that these options are mutually exclusive
+                {
+                    ldapConnection.SessionOptions.Sealing = true;
+                    ldapConnection.SessionOptions.Signing = true;
+                }
+
                 ldapConnection.Bind();
 
                 if (Options.relayAttackType == Relay.RelayAttackType.RBCD)
