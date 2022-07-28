@@ -1,5 +1,7 @@
-
 # KrbRelayUp
+
+:exclamation: **Changes in this fork:** add `-u2u` flag which treats provided computer account as a normal **user** account for [performing](https://github.com/GhostPack/Rubeus/pull/137) [RBCD with UPNs](https://www.tiraniddo.dev/2022/05/exploiting-rbcd-using-normal-user.html). Only available for the `RELAY` phase (will not work with `SPAWN` or `FULL`).
+
 Simple wrapper around some of the features of [Rubeus](https://github.com/GhostPack/Rubeus/) and [KrbRelay](https://github.com/cube0x0/KrbRelay) (and a few other honorable mentions in the acknowledgements section) in order to streamline the abuse of the following attack primitive:
 
 0. (Optional) New machine account creation ([New-MachineAccount](https://github.com/Kevin-Robertson/Powermad/blob/master/Powermad.ps1))
@@ -56,6 +58,7 @@ Usage: KrbRelayUp.exe relay -d FQDN -cn COMPUTERNAME [-c] [-cp PASSWORD | -ch NT
     -c   (--CreateNewComputerAccount) Create new computer account for RBCD. Will use the current authenticated user.
     -cn  (--ComputerName)             Name of attacker owned computer account for RBCD. (default=KRBRELAYUP$)
     -cp  (--ComputerPassword)         Password of computer account for RBCD. (default=RANDOM [if -c is enabled])
+    -u2u (--UseU2U)                   Treat the computer account (provided within -cn flag) as a user account for RBCD with UPNs (https://www.tiraniddo.dev/2022/05/exploiting-rbcd-using-normal-user.html)
 
     # SHADOWCRED Method:
     -f   (--ForceShadowCred)          Clear the msDS-KeyCredentialLink attribute of the attacked computer account before adding our new shadow credentials. (Optional)
