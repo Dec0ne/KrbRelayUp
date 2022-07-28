@@ -46,7 +46,7 @@ namespace KrbRelayUp.Relay
                 ldap_unbind(ld);
                 //Environment.Exit(0);
             }
-            if ((LdapStatus)value != LdapStatus.LDAP_SASL_BIND_IN_PROGRESS)
+            else if ((LdapStatus)value != LdapStatus.LDAP_SASL_BIND_IN_PROGRESS)
             {
                 if (!Options.attackDone)
                     Console.WriteLine("[-] LDAP connection failed");
