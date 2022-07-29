@@ -199,7 +199,7 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
             //Console.WriteLine("[+] {0}: {1}", attribute, Encoding.ASCII.GetString(t));
 
             Marshal.FreeHGlobal(controlPtr);
-            return Encoding.ASCII.GetString(t);
+            return Encoding.UTF8.GetString(t);
             //return "";
         }
 
@@ -246,7 +246,7 @@ namespace KrbRelayUp.Relay.Attacks.Ldap
             //Console.WriteLine("[+] {0}: {1}", attribute, Encoding.ASCII.GetString(t));
 
             Marshal.FreeHGlobal(controlPtr);
-            return Encoding.ASCII.GetString(t);
+            return Encoding.UTF8.GetString(t);
         }
     }
 }
